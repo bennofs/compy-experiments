@@ -11,12 +11,14 @@ fi
 export COMPY_REV="$1"
 shift
 
+IFS=" " read -r -a SLURM_ARGS_ARRAY <<< "$SLURM_ARGS"
+
 # build compy if not in cache
 export COMPY_WHEEL="$CACHE_ROOT/ComPy-$COMPY_REV-$WHEEL_COMPAT.whl"
 if [[ ! -f "$COMPY_WHEEL" ]]; then
-  env COMPY_WHEEL="" srun "${SLURM_ARGS[@]}" -n1 -c8 --mem=32G "$EXPERIMENTS_ROOT/run" \
+  env COMPY_WHEEL="" srun "${SLURM_ARGS_ARRAY[@]}" -n1 -c8 --mem=32G "$EXPERIMENTS_ROOT/run" \
    "$SLURM_ENV" python "$EXPERIMENTS_ROOT/tasks/build-compy.py" "$COMPY_REV" "$(dirname "$COMPY_WHEEL")"
 fi
 
 # run batch job
-sbatch "${SLURM_ARGS[@]}" "$EXPERIMENTS_ROOT/run" "$SLURM_ENV"-slurm "$@"
+sbatch "${SLURM_ARGS_ARRAY[@]}" "$EXPERIMENTS_ROOT/run" "$SLURM_ENV"-slurm "$@"
