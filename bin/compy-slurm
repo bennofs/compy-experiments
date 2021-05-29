@@ -21,4 +21,7 @@ if [[ ! -f "$COMPY_WHEEL" ]]; then
 fi
 
 # run batch job
-sbatch "${SLURM_ARGS_ARRAY[@]}" "$EXPERIMENTS_ROOT/run" "$SLURM_ENV" "$@"
+sbatch "${SLURM_ARGS_ARRAY[@]}" <<EOF
+#!/usr/bin/env bash
+exec "$EXPERIMENTS_ROOT/run" "$SLURM_ENV" "$@"
+EOF
