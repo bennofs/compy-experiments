@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 if [[ "$#" -lt 1 ]]; then
   echo "usage: compy-slurm COMPY_REVISION command [args...]"
@@ -14,8 +15,8 @@ shift
 export COMPY_WHEEL="$CACHE_ROOT/ComPy-$COMPY_REV-$WHEEL_COMPAT.whl"
 if [[ ! -f "$COMPY_WHEEL" ]]; then
   env COMPY_WHEEL="" srun "${SLURM_ARGS[@]}" -n1 -c8 --mem=32G "$EXPERIMENTS_ROOT/run" \
-   "$ENV_NAME"-slurm python "$EXPERIMENTS_ROOT/tasks/build-compy.py" "$COMPY_REV" "$(dirname "$COMPY_WHEEL")"
+   "$SLURM_ENV" python "$EXPERIMENTS_ROOT/tasks/build-compy.py" "$COMPY_REV" "$(dirname "$COMPY_WHEEL")"
 fi
 
 # run batch job
-sbatch "${SLURM_ARGS[@]}" "$EXPERIMENTS_ROOT/run" "$ENV_NAME"-slurm "$@"
+sbatch "${SLURM_ARGS[@]}" "$EXPERIMENTS_ROOT/run" "$SLURM_ENV"-slurm "$@"
