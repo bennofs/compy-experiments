@@ -8,7 +8,7 @@ from plumbum import local, path, FG
 def main(args):
     with tempfile.TemporaryDirectory() as tmp:
         local.cwd.chdir(tmp)
-        local['pip'].run_fg('wheel', '--no-deps', f'https://github.com/bennofs/compy-learn/archive/{args.commit}.tar.gz')
+        local['pip'].run_fg(['wheel', '--no-deps', f'https://github.com/bennofs/compy-learn/archive/{args.commit}.tar.gz'])
         files = list(local.cwd // "*.whl")
         assert len(files) == 1, "pip wheel should produce exactly one wheel, got: " + ", ".join(str(f) for f in files)
         whl = files[0]
