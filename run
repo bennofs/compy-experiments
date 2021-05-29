@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+export EXPERIMENTS_ROOT="$(realpath $(dirname "$BASH_SOURCE"))"
+export PYTHONPATH="$EXPERIMENTS_ROOT/lib:$PYTHONPATH"
+export PATH="$EXPERIMENTS_ROOT/bin:$EXPERIMENTS_ROOT/tasks:$PATH"
+
+if [[ "$#" -lt 1 ]]; then
+  echo "usage: env-run ENV_NAME command [args...]"
+  echo ""
+  echo "Sets up the environment (PYTHONPATH, PATH), sources the env.ENV_NAME.sh file from the project root and runs the command."
+  exit 2
+fi
+
+export ENV_NAME="$1"
+shift
+
+if [[ ! -f "$EXPERIMENTS_ROOT/env.$ENV_NAME.sh" ]]; then
+  echo "error: environment file $EXPERIMENTS_ROOT/env.$ENV_NAME.sh does not exist"
+  echo "if you don't need any special environment variables, please create an empty file"
+  exit 1
+fi
+
+source "$EXPERIMENTS_ROOT/env.$ENV_NAME.sh"
+exec "$@"

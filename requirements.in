@@ -1,0 +1,16 @@
+# compy-learn deps
+appdirs
+gitpython
+numpy
+torch
+torch-geometric
+tensorflow
+pygraphviz
+appdirs
+pandas
+tqdm
+
+# utilities
+ipython
+ipykernel
+plumbum
