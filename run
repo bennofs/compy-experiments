@@ -21,4 +21,4 @@ if [[ ! -f "$EXPERIMENTS_ROOT/env.$ENV_NAME.sh" ]]; then
 fi
 
 source "$EXPERIMENTS_ROOT/env.$ENV_NAME.sh"
-exec "$@"
+source "$@"
