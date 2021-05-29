@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-export EXPERIMENTS_ROOT="$(realpath $(dirname "$BASH_SOURCE"))"
+EXPERIMENTS_ROOT="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+export EXPERIMENTS_ROOT
 export PYTHONPATH="$EXPERIMENTS_ROOT/lib:$PYTHONPATH"
 export PATH="$EXPERIMENTS_ROOT/bin:$EXPERIMENTS_ROOT/tasks:$PATH"
 
