@@ -1,0 +1,9 @@
+if [[ -z "$EXPERIMENTS_ROOT" ]]; then
+  EXPERIMENTS_ROOT="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+  export EXPERIMENTS_ROOT
+fi
+
+export PYTHONPATH="$EXPERIMENTS_ROOT:$PYTHONPATH"
+export PATH="$EXPERIMENTS_ROOT/bin:$EXPERIMENTS_ROOT/tasks:$PATH"
+
+source $EXPERIMENTS_ROOT/env.sh

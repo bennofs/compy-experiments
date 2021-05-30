@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+import argparse
+
+from lib import cluster
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Build the given compy version if it's not already in the cache")
+    parser.add_argument("commit", help="Git commit revision to build")
+    args = parser.parse_args()
+
+    job_id = cluster.cache_compy(args.commit)
+    if job_id:
+        print(job_id)
+
