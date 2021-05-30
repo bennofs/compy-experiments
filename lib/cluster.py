@@ -35,7 +35,8 @@ def compy_wheel_path(commit):
 
 
 def cache_compy(commit):
-    if os.path.exists(compy_wheel_path(commit)):
+    wheel_path = compy_wheel_path(commit)
+    if os.path.exists(wheel_path):
         return # already build
 
     script = f'''
@@ -48,7 +49,7 @@ def cache_compy(commit):
     return sbatch(script, logfile=LOGS_DIR / f"build-compy-{commit}.log", args=['-c8', '-n1', '--mem', '32G'])
 
 
-def run_experiment(commit, experiment_script, args, slurm_args):
+def run_experiment(commit, experiment_script, args, slurm_args, cpu, mem):
     name, _ = os.path.splitext(os.path.basename(experiment_script))
     experiment_script = os.path.realpath(experiment_script)
     cache_jobid = cache_compy(commit)
@@ -72,13 +73,13 @@ def run_experiment(commit, experiment_script, args, slurm_args):
     '''
 
     slurm_args += [
-        '-c4',
-        '--mem', '16G',
+        '--cpus-per-task', str(cpu),
+        '--mem', mem,
         '--gres', 'gpu:1',
         '-n1',
-        '--name', name
+        '--job-name', name
     ]
     if cache_jobid is not None:
         slurm_args += ['--dependency', f'afterok:{cache_jobid}']
 
-    return sbatch(script, logfile=results / "log")
+    return sbatch(script, logfile=results / "log", args=slurm_args)

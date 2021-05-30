@@ -5,12 +5,15 @@ from lib import cluster
 
 
 def main(args):
-    cluster.run_experiment(args.commit, args.script, args.args, [arg for x in args.slurm for arg in x.split(' ')])
+    slurm_args = [arg for val in args.slurm for s in val for arg in s.split(' ')]
+    cluster.run_experiment(args.commit, args.script, args.args, slurm_args, cpu=args.cpu, mem=args.mem)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Launch a script on the cluster with a given compy version")
-    parser.add_argument('--slurm', help="Additional arguments to pass to sbatch", nargs=1, action='extend', default=[])
+    parser.add_argument('--slurm', help="Additional arguments to pass to sbatch", nargs=1, action='append', default=[])
+    parser.add_argument('--cpu', nargs=1, type=int, help='Number of cpu cores to allocate', default=4)
+    parser.add_argument('--mem', nargs=1, type=str, help='Memory for task', default='16G')
     parser.add_argument('commit', help='Compy version to run against')
     parser.add_argument('script', help='Script to launch')
     parser.add_argument('args', help='Arguments to pass to the launch script', nargs='*')
