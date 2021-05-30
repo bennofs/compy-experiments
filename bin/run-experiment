@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+import argparse
+
+from lib import cluster
+
+
+def main(args):
+    cluster.run_experiment(args.commit, args.script, args.args, [arg for x in args.slurm for arg in x.split(' ')])
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Launch a script on the cluster with a given compy version")
+    parser.add_argument('--slurm', help="Additional arguments to pass to sbatch", nargs=1, action='extend', default=[])
+    parser.add_argument('commit', help='Compy version to run against')
+    parser.add_argument('script', help='Script to launch')
+    parser.add_argument('args', help='Arguments to pass to the launch script', nargs='*')
+    main(parser.parse_args())
