@@ -21,7 +21,7 @@ def sbatch(script: str, *, logfile, args=None, partition='ml'):
         args = []
     script = dedent(script).strip().encode()
     result = subprocess.run(
-        ['sbatch', '--parseable', '-p', partition, '-o', logfile] + args,
+        ['sbatch', '--parsable', '-p', partition, '-o', logfile] + args,
         input=script, check=True, stdout=subprocess.PIPE,
     ).stdout
     return int(result.decode().strip().split("\n")[-1])
@@ -39,4 +39,4 @@ def cache_compy(commit):
     exec python3 {EXPERIMENTS_ROOT / 'tasks/build-compy.py'} "{commit}" "{os.path.dirname(wheel_path)}"
     '''
 
-    return sbatch(script, logfile=LOGS_DIR / f"build-compy-{commit}.log")
+    return sbatch(script, logfile=LOGS_DIR / f"build-compy-{commit}.log", args=['-c8', '-n1', '--mem', '32G'])
