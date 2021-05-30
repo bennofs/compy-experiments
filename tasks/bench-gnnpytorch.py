@@ -30,6 +30,7 @@ def main(args):
     samples = np.array([to_common_graph_sample(s, vocab) for s in data['samples']])
     rng.shuffle(samples)
 
+    print("starting training")
     test_len = len(data['samples']) // 10
     test, train = samples[:test_len], samples[test_len:]
     model.train(train, test)
