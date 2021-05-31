@@ -1,12 +1,30 @@
 #!/usr/bin/env python3
 import argparse
+import re
+import subprocess
 
 from lib import cluster
 
 
+RE_GIT_COMMIT_SHA = re.compile(r'^[a-f0-9]{40}$')
+
+
+def resolve_commit(commit):
+    if RE_GIT_COMMIT_SHA.match(commit):
+        return commit
+
+    if commit == 'latest':
+        subprocess.run(['git', 'pull'], check=True, cwd=cluster.COMPY_ROOT)
+        commit = 'HEAD'
+
+    result = subprocess.run(['git', 'rev-parse', commit], stdout=subprocess.PIPE, check=True, cwd=cluster.COMPY_ROOT)
+    return result.stdout.decode().strip()
+
+
 def main(args):
     slurm_args = [arg for val in args.slurm for s in val for arg in s.split(' ')]
-    cluster.run_experiment(args.commit, args.script, args.args, slurm_args, cpu=args.cpu, mem=args.mem)
+    commit = resolve_commit(args.commit)
+    cluster.run_experiment(commit, args.script, args.args, slurm_args, cpu=args.cpu, mem=args.mem)
 
 
 if __name__ == '__main__':
@@ -14,7 +32,7 @@ if __name__ == '__main__':
     parser.add_argument('--slurm', help="Additional arguments to pass to sbatch", nargs=1, action='append', default=[])
     parser.add_argument('--cpu', nargs=1, type=int, help='Number of cpu cores to allocate', default=4)
     parser.add_argument('--mem', nargs=1, type=str, help='Memory for task', default='16G')
-    parser.add_argument('commit', help='Compy version to run against')
+    parser.add_argument('--commit', help='Compy version to run against', default='latest')
     parser.add_argument('script', help='Script to launch')
     parser.add_argument('args', help='Arguments to pass to the launch script', nargs='*')
     main(parser.parse_args())

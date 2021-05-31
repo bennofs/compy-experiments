@@ -8,6 +8,7 @@ from textwrap import dedent
 PROJECTS_DIR = Path(os.getenv("P"))
 WORKSPACE_DIR = Path(os.getenv("WS"))
 EXPERIMENTS_ROOT = Path(os.getenv("EXPERIMENTS_ROOT"))
+COMPY_ROOT = Path(os.getenv("COMPY_ROOT"))
 WHEEL_SLUG = os.getenv("WHEEL_SLUG")
 
 CLUSTER_ENV_HOOK = EXPERIMENTS_ROOT / 'hooks/cluster-env.sh'
