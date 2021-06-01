@@ -1,2 +1,5 @@
 /local/
 /env.*
+*.pyc
+__pycache__
+*.swp

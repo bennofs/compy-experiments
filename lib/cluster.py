@@ -20,12 +20,12 @@ for path in [CACHE_DIR, LOGS_DIR, RESULTS_DIR]:
     os.makedirs(path, exist_ok=True)
 
 
-def sbatch(script: str, *, logfile, args=None, partition='ml'):
+def sbatch(script: str, *, logfile, args=None, partition='ml', time='2:00:00'):
     if args is None:
         args = []
     script = dedent(script).strip().encode()
     result = subprocess.run(
-        ['sbatch', '--parsable', '-p', partition, '-o', logfile] + args,
+        ['sbatch', '--parsable', '-p', partition, '-o', logfile, '--time', time] + args,
         input=script, check=True, stdout=subprocess.PIPE,
     ).stdout
     return int(result.decode().strip().split("\n")[-1])
