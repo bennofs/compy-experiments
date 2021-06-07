@@ -62,6 +62,9 @@ def run_experiment(commit, experiment_script, args, slurm_args, cpu, mem):
     with open(results / 'commit', 'w') as f:
         f.write(commit)
 
+    with open(results / 'parameters', 'w') as f:
+        f.write(str(args))
+
     quoted_args = " ".join(shlex.quote(a) for a in args)
 
     script = f'''
