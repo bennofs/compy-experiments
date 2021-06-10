@@ -129,7 +129,7 @@ def main(args):
     # Train and test
     kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=204)
     split = kf.split(balanced_samples, [sample["y"] for sample in balanced_samples])
-    for train_idx, test_idx in split:
+    for i, (train_idx, test_idx) in enumerate(split):
         train_data = make_dataset(balanced_samples[train_idx])
         test_data = make_dataset(balanced_samples[test_idx])
 
@@ -137,7 +137,7 @@ def main(args):
         opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
         model.fit(train_data, validation_data=test_data, epochs=1000, callbacks=[
-            tf.keras.callbacks.TensorBoard(f'/tmp/tb-logs/{args.hidden}h-{args.dropout}do')
+            tf.keras.callbacks.TensorBoard(f'/tmp/tb-logs/{i:02}-{args.hidden}h-{args.dropout}do')
         ])
 
 
