@@ -2,6 +2,7 @@ import argparse
 import pickle
 import typing
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
@@ -137,7 +138,7 @@ def main(args):
         opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
         model.fit(train_data, validation_data=test_data, epochs=1000, callbacks=[
-            tf.keras.callbacks.TensorBoard(f'/tmp/tb-logs/{i:02}-{args.hidden}h-{args.dropout}do')
+            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/{i:02}-{args.hidden}h-{args.dropout}do')
         ])
 
 

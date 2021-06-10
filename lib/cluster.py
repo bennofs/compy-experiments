@@ -1,4 +1,5 @@
 import os
+import secrets
 import subprocess
 import shlex
 from datetime import datetime
@@ -54,7 +55,8 @@ def run_experiment(commit, experiment_script, args, slurm_args, cpu, mem):
     name, _ = os.path.splitext(os.path.basename(experiment_script))
     experiment_script = os.path.realpath(experiment_script)
     cache_jobid = cache_compy(commit)
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    token = secrets.token_hex(6) # prevent collisions when jobs are started at the same time
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + token
     slug = f'{name}-{stamp}'
     results = RESULTS_DIR / slug
     os.makedirs(results)
