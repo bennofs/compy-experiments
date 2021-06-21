@@ -30,7 +30,7 @@ CONFIG = {
     'rnn': {
         'num_layers': 1,
     },
-    'num_epochs': 1000,
+    'num_epochs': 250,
 }
 
 
@@ -140,6 +140,7 @@ def main(args):
         model.fit(train_data, validation_data=test_data, epochs=1000, callbacks=[
             tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/{i:02}-{args.hidden}h-{args.dropout}do')
         ])
+        model.save(f'{i:02}-{args.hidden}h-{args.dropout}do.h5')
 
 
 if __name__ == '__main__':
