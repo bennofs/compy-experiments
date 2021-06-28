@@ -1,7 +1,6 @@
 import argparse
+import json
 import pickle
-import typing
-from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -9,8 +8,6 @@ import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold
 
 from compy.models.graphs.tf2_sandwich_model import sandwich_model
-from compy.representations.sequence_graph import Vocabulary, SequenceGraph
-
 
 CONFIG = {
     'layers': ['rnn', 'ggnn', 'rnn', 'ggnn', 'rnn'],
@@ -137,10 +134,12 @@ def main(args):
         model = sandwich_model(CONFIG, rnn_dense=True)
         opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
-        model.fit(train_data, validation_data=test_data, epochs=1000, callbacks=[
+        history_callback = model.fit(train_data, validation_data=test_data, epochs=250, callbacks=[
             tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/{i:02}-{args.hidden}h-{args.dropout}do')
         ])
-        model.save(f'{i:02}-{args.hidden}h-{args.dropout}do.h5')
+        with open(f'{args.hidden}h-{args.dropout}do-{i:02}-metrics.json', 'w') as f:
+            json.dump(history_callback.history, f)
+        model.save(f'{args.hidden}h-{args.dropout}do-{i:02}.h5')
 
 
 if __name__ == '__main__':
