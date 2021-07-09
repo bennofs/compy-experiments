@@ -10,7 +10,7 @@ from sklearn.model_selection import StratifiedKFold
 from compy.models.graphs.tf2_sandwich_model import sandwich_model
 
 CONFIG = {
-    'layers': ['rnn', 'ggnn', 'rnn', 'ggnn', 'rnn'],
+    'layers': ['ggnn'],
     'batch_size': 32,
     'learning_rate': 0.001,
     'base': {
@@ -20,7 +20,7 @@ CONFIG = {
         'dropout_rate': 0.1,
     },
     'ggnn': {
-        'time_steps': [3, 1],
+        'time_steps': [3, 1, 3, 1],
         'residuals': {'1': [0]},
         'add_type_bias': True,
     },
@@ -101,7 +101,6 @@ def make_dataset(samples):
 def main(args):
     tf.compat.v1.enable_eager_execution()
     tf.compat.v1.enable_v2_behavior()
-    #tf.debugging.experimental.enable_dump_debug_info(args.logdir)
 
     with open(args.data, 'rb') as f:
         data = pickle.load(f)
@@ -144,7 +143,7 @@ def main(args):
         opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
         history_callback = model.fit(train_data, validation_data=test_data, epochs=250, callbacks=[
-            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/{i:02}-{args.hidden}h-{args.dropout}do')
+            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/ggnn-drop-long/{i:02}-{args.hidden}h-{args.dropout}do')
         ])
         with open(f'{args.hidden}h-{args.dropout}do-{i:02}-metrics.json', 'w') as f:
             json.dump(history_callback.history, f)
