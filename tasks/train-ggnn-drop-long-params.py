@@ -139,7 +139,10 @@ def main(args):
     kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=204)
     split = kf.split(balanced_samples, [sample["y"] for sample in balanced_samples])
     for i, (train_idx, test_idx) in enumerate(split):
-        train_data = make_dataset(balanced_samples[train_idx])
+        rng = np.random.default_rng(seed=0)
+        train_samples = balanced_samples[train_idx]
+        rng.shuffle(train_samples)
+        train_data = make_dataset(train_samples)
         test_data = make_dataset(balanced_samples[test_idx])
 
         model = sandwich_model(CONFIG, rnn_dense=True)
