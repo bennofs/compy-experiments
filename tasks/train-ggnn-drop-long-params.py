@@ -113,8 +113,8 @@ def main(args):
     samples_positive = [sample for sample in samples if sample['y']]
     assert len(samples_negative) > len(samples_positive)
 
-    CONFIG['base']['num_edge_types'] = max(max(s['x']['code_rep'].edges[0]) for s in samples) + 1
-    CONFIG['base']['hidden_size_orig'] = data['num_types']
+    CONFIG['base']['num_edge_types'] = int(max(max(s['x']['code_rep'].edges[0]) for s in samples) + 1)
+    CONFIG['base']['hidden_size_orig'] = int(data['num_types'])
     CONFIG['base']['hidden_dim'] = int(args.hidden)
     CONFIG['base']['dropout_rate'] = float(args.dropout)
 
