@@ -152,7 +152,7 @@ def main(args):
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
         history_callback = model.fit(train_data, validation_data=test_data, epochs=250, callbacks=[
             tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/{i:02}-{args.hidden}h-{args.dropout}do'),
-            tf.keras.callbacks.ModelCheckpoint(f'{args.hidden}h-{args.dropout}do-{i:02}-{{epoch}}.h5', save_weights_only=True)
+            tf.keras.callbacks.ModelCheckpoint(f'{args.hidden}h-{args.dropout}do-{i:02}-{{epoch:03}}.h5', save_weights_only=True)
         ])
         with open(f'{args.hidden}h-{args.dropout}do-{i:02}-metrics.json', 'w') as f:
             json.dump(history_callback.history, f)
