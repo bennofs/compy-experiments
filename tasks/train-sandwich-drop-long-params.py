@@ -145,7 +145,8 @@ def main(args):
         rng.shuffle(train_samples)
         train_data = make_dataset(train_samples)
 
-        test_samples = rng.shuffle(balanced_samples[test_idx])
+        test_samples = balanced_samples[test_idx]
+        rng.shuffle(test_samples)
         test_data = make_dataset(test_samples)
 
         model = sandwich_model(CONFIG, rnn_dense=True)
