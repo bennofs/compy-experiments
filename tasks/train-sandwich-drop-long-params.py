@@ -117,7 +117,10 @@ def main(args):
     CONFIG['base']['num_edge_types'] = max(max(s['x']['code_rep'].edges[0]) for s in samples) + 1
     CONFIG['base']['hidden_size_orig'] = data['num_types']
     CONFIG['base']['hidden_dim'] = int(args.hidden)
-    CONFIG['base']['dropout'] = float(args.dropout)
+    CONFIG['base']['dropout_rate'] = float(args.dropout)
+
+    with open('config.json', 'w') as f:
+        json.dump(CONFIG, f)
 
     rng = np.random.default_rng(seed=0)
     samples_negative_downsampled = rng.choice(samples_negative, size=len(samples_positive), replace=False)
@@ -137,18 +140,23 @@ def main(args):
     kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=204)
     split = kf.split(balanced_samples, [sample["y"] for sample in balanced_samples])
     for i, (train_idx, test_idx) in enumerate(split):
-        train_data = make_dataset(balanced_samples[train_idx])
-        test_data = make_dataset(balanced_samples[test_idx])
+        rng = np.random.default_rng(seed=0)
+        train_samples = rng.shuffle(balanced_samples[train_idx])
+        train_data = make_dataset(train_samples)
+
+        test_samples = rng.shuffle(balanced_samples[test_idx])
+        test_data = make_dataset(test_samples)
 
         model = sandwich_model(CONFIG, rnn_dense=True)
         opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
         history_callback = model.fit(train_data, validation_data=test_data, epochs=250, callbacks=[
-            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/{i:02}-{args.hidden}h-{args.dropout}do')
+            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-logs/{i:02}-{args.hidden}h-{args.dropout}do'),
+            tf.keras.callbacks.ModelCheckpoint(f'{args.hidden}h-{args.dropout}do-{i:02}-{{epoch}}.h5', save_weights_only=True)
         ])
         with open(f'{args.hidden}h-{args.dropout}do-{i:02}-metrics.json', 'w') as f:
             json.dump(history_callback.history, f)
-        model.save(f'{args.hidden}h-{args.dropout}do-{i:02}.h5')
+        model.save_weights(f'{args.hidden}h-{args.dropout}do-{i:02}.h5')
 
 
 if __name__ == '__main__':
