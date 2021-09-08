@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+target_commit="$1"
+shift
+
+out="$(git clone --progress --reference /repo "$@" |& tee /dev/stderr | awk -F\' '/Cloning into/ {print $2}')"
+cd $out
+
+git fetch --unshallow
+if git rev-parse -q --verify "$target_commit"; then
+  git checkout "$target_commit"
+fi

@@ -6,10 +6,12 @@ from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 
-PROJECTS_DIR = Path(os.getenv("P"))
-WORKSPACE_DIR = Path(os.getenv("WS"))
-EXPERIMENTS_ROOT = Path(os.getenv("EXPERIMENTS_ROOT"))
-COMPY_ROOT = Path(os.getenv("COMPY_ROOT"))
+from lib import config
+
+PROJECTS_DIR = Path(os.getenv("P", ""))
+WORKSPACE_DIR = Path(os.getenv("WS", ""))
+EXPERIMENTS_ROOT = Path(os.getenv("EXPERIMENTS_ROOT", config.get_project_dir()))
+COMPY_ROOT = Path(os.getenv("COMPY_ROOT", config.get_project_dir().parent / "compy-learn"))
 WHEEL_SLUG = os.getenv("WHEEL_SLUG")
 
 CLUSTER_ENV_HOOK = EXPERIMENTS_ROOT / 'hooks/cluster-env.sh'
