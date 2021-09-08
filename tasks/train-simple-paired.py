@@ -21,7 +21,7 @@ CONFIG = {
     },
     'ggnn': {
         'time_steps': [8],
-        'residuals': {'1': [0]},
+        'residuals': {},
         'add_type_bias': True,
     },
     'rnn': {
