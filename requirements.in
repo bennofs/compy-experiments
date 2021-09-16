@@ -15,3 +15,6 @@ ipython
 ipykernel
 plumbum
 pygit2
+
+# StratifiedKFold returns different results for newer scikit-learn versions
+scikit-learn==0.21.3
