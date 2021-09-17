@@ -60,16 +60,11 @@ def run_build(tmpdir: Path, runtime: Runtime, rootfs: Path, jobs=1):
     strace_cmd = ["/strace-static", "-xx", "--seccomp-bpf", "-f", "-e",
                   "execve,chdir,fchdir,execveat,fork,vfork,clone,%process", '-y', '-s', '999999999', "-o", "/strace"]
     c = runtime.config_container(rootfs, strace_cmd + ["make", f"-j{jobs}"], workdir="/src/")
-    with contextlib.ExitStack() as stack:
-        stdout = stack.enter_context(open(tmpdir / 'stdout', 'w'))
-        stderr = stack.enter_context(open(tmpdir / 'stderr', 'w'))
+    proc = runtime.spawn(c, check=False)
 
-        proc = stack.enter_context(runtime.spawn_background(c, stdout=stdout, stderr=stderr, check=False))
-        proc.wait()
-
-        build_success = proc.returncode == 0
-        print("build success" if build_success else "build fail", file=sys.stderr)
-        return build_success
+    build_success = proc.returncode == 0
+    print("build success" if build_success else "build fail", file=sys.stderr)
+    return build_success
 
 
 def parse_strace_commands(rootfs: Path):
@@ -246,6 +241,13 @@ def prepare_rootfs(runtime, args, rootfs):
     # install build dependencies
     add_src_to_sources_list(rootfs)
     install_build_deps(runtime, rootfs)
+
+    # these versions don't have the yasm package
+    if args.dist not in {'hamm', 'slink', 'potato', 'sarge'}:
+        runtime.spawn(runtime.config_container(rootfs, [
+            'env', 'DEBIAN_FRONTEND=noninteractive',
+            'apt-get', '--force-yes', '-y', 'install', 'yasm', 'nasm',
+        ]))
 
     if args.rootfs_cache is not None:
         save_to_cache(runtime, cache_root, cache_key, rootfs)
