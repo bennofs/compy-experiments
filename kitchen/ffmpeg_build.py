@@ -49,9 +49,11 @@ def install_build_deps(runtime: Runtime, rootfs: Path):
 
 
 def run_build(tmpdir: Path, runtime: Runtime, rootfs: Path, jobs=1):
-    runtime.spawn(runtime.config_container(rootfs, [
+    proc = runtime.spawn(runtime.config_container(rootfs, [
         "bash", "configure"
-    ], workdir="/src"))
+    ], workdir="/src"), check=False)
+    if proc.returncode != 0:
+        return "configure-failed"
 
     strace_path = config.get_tracing_helpers_path() / 'strace-static'
     shutil.copy(strace_path, rootfs / "strace-static")
@@ -152,7 +154,7 @@ def apply_patches(datadir: Path, srcdir: Path):
     fix_libac3(datadir, srcdir)
 
 
-def process_file(runtime: Runtime, rootfs: Path, fpath: str, commands):
+def process_c_file(runtime: Runtime, rootfs: Path, fpath: str, commands):
     fname = os.path.basename(fpath)
     container_path = os.path.normpath('/src/' + fpath)
     for command in find_commands_for_file(fname, commands):
@@ -253,6 +255,44 @@ def prepare_rootfs(runtime, args, rootfs):
         save_to_cache(runtime, cache_root, cache_key, rootfs)
 
 
+def src_candidates_for_header(src: Path, fpath: Path):
+    absolute = src / fpath
+    header_name = fpath.name
+
+    p = absolute.with_suffix('.c')
+    if p.exists() and header_name in p.read_text():
+        yield p.relative_to(src)
+
+    for src_file in absolute.parent.glob("*.c"):
+        if header_name in src_file.read_text():
+            yield src_file.relative_to(src)
+
+    for src_file in src.rglob('**/*.c'):
+        if header_name in src_file.read_text():
+            yield src_file.relative_to(src)
+
+
+def process_header(runtime: Runtime, rootfs: Path, fpath: str, commands):
+    fpath = Path(fpath)
+    src = rootfs / 'src'
+    for candidate in src_candidates_for_header(src, fpath):
+        result = process_c_file(runtime, rootfs, str(candidate), commands)
+        if result is None: continue
+
+        content = base64.b64decode(result['preprocessed'])
+        container_path = str(Path('/src') / fpath)
+        if container_path.encode() in content:
+            return result
+
+
+def process_file(runtime: Runtime, rootfs: Path, fpath: str, commands):
+    if fpath.endswith(".h"):
+        return process_header(runtime, rootfs, fpath, commands)
+
+    return process_c_file(runtime, rootfs, fpath, commands)
+
+
+
 def main(args, cleanup):
     runtime = Runtime()
     tmpdir = Path(str(cleanup.enter_context(TemporaryDirectory(prefix="build-ffmpeg-"))))
@@ -290,7 +330,7 @@ def main(args, cleanup):
     dest_repo.reset(spec['sha_id'], pygit2.GIT_RESET_HARD)
     apply_patches(Path(args.data), rootfs / 'src')
     build_success_after = run_build(tmpdir, runtime, rootfs)
-    if not build_success_after:
+    if build_success_after is not True:
         shutil.rmtree(rootfs / "src")
         sources.create_detached_checkout(args.repo, rootfs / "src", spec['sha_id'])
         apply_patches(Path(args.data), rootfs / 'src')
