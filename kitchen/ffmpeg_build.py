@@ -301,6 +301,13 @@ def main(args, cleanup):
     rootfs = tmpdir / "rootfs"
     prepare_rootfs(runtime, args, rootfs)
 
+    # cleanup the rootfs using the runtime, to prevent permission errors
+    def clean_rootfs():
+        proc = runtime.spawn(runtime.config_host(['rm', '-rf', str(rootfs.absolute())]), check=False)
+        if proc.returncode != 0:
+            logging.warning("cleanup of rootfs %s with rm -rf failed", str(rootfs))
+    cleanup.callback(clean_rootfs)
+
     # create checkout of src repo at the base revision
     with open(args.spec) as f:
         spec = json.load(f)
@@ -368,6 +375,9 @@ def main(args, cleanup):
 class NoopExitStack():
     def enter_context(self, v):
         return v.__enter__()
+
+    def callback(self, *args, **kwargs):
+        pass
 
 
 if __name__ == '__main__':
