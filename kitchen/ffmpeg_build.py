@@ -334,9 +334,13 @@ def main(args, cleanup):
     # first try to run an incremental build
     # if that fails, clean and run a full build
     dest_repo = pygit2.Repository(rootfs / "src")
-    dest_repo.reset(spec['sha_id'], pygit2.GIT_RESET_HARD)
-    apply_patches(Path(args.data), rootfs / 'src')
-    build_success_after = run_build(tmpdir, runtime, rootfs)
+    try:
+        dest_repo.reset(spec['sha_id'], pygit2.GIT_RESET_HARD)
+        apply_patches(Path(args.data), rootfs / 'src')
+        build_success_after = run_build(tmpdir, runtime, rootfs)
+    except (OSError, pygit2.GitError) as e:
+        logging.warning("failed to reset repo to %s: %s", spec['sha_id'], str(e))
+        build_success_after = False
     if build_success_after is not True:
         shutil.rmtree(rootfs / "src")
         sources.create_detached_checkout(args.repo, rootfs / "src", spec['sha_id'])
