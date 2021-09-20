@@ -50,9 +50,10 @@ def install_build_deps(runtime: Runtime, rootfs: Path):
 
 def run_build(tmpdir: Path, runtime: Runtime, rootfs: Path, jobs=1):
     proc = runtime.spawn(runtime.config_container(rootfs, [
-        "bash", "configure"
+        "./configure"
     ], workdir="/src"), check=False)
     if proc.returncode != 0:
+        (rootfs / "strace").touch()
         return "configure-failed"
 
     strace_path = config.get_tracing_helpers_path() / 'strace-static'
@@ -61,7 +62,7 @@ def run_build(tmpdir: Path, runtime: Runtime, rootfs: Path, jobs=1):
 
     strace_cmd = ["/strace-static", "-xx", "--seccomp-bpf", "-f", "-e",
                   "execve,chdir,fchdir,execveat,fork,vfork,clone,%process", '-y', '-s', '999999999', "-o", "/strace"]
-    c = runtime.config_container(rootfs, strace_cmd + ["make", f"-j{jobs}"], workdir="/src/")
+    c = runtime.config_container(rootfs, strace_cmd + ["make", f"-j{jobs}", "--keep-going"], workdir="/src/")
     proc = runtime.spawn(c, check=False)
 
     build_success = proc.returncode == 0
@@ -260,15 +261,15 @@ def src_candidates_for_header(src: Path, fpath: Path):
     header_name = fpath.name
 
     p = absolute.with_suffix('.c')
-    if p.exists() and header_name in p.read_text():
+    if p.exists() and header_name.encode() in p.read_bytes():
         yield p.relative_to(src)
 
     for src_file in absolute.parent.glob("*.c"):
-        if header_name in src_file.read_text():
+        if header_name.encode() in src_file.read_bytes():
             yield src_file.relative_to(src)
 
     for src_file in src.rglob('**/*.c'):
-        if header_name in src_file.read_text():
+        if header_name.encode() in src_file.read_bytes():
             yield src_file.relative_to(src)
 
 
