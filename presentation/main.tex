@@ -1,0 +1,164 @@
+\documentclass[169]{beamer}
+
+\usetheme[numbering=fraction]{metropolis}
+
+\usepackage{polyglossia}
+\usepackage{csquotes}
+\usepackage{fontspec}
+\usepackage{blindtext}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{appendixnumberbeamer}
+\usepackage{tikz}
+\usepackage{pifont}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{calc}
+\usetikzlibrary{fit}
+\usepackage{upquote}
+
+\lstset{upquote=true}
+\metroset{block=fill}
+%\setsansfont[BoldFont={Fira Sans SemiBold}]{Fira Sans Book}
+\makeatletter
+\newlength\beamerleftmargin
+\setlength\beamerleftmargin{\Gm@lmargin}
+\makeatother
+
+\title{Learning Vulnerability Discovery with Global-Relational Models}
+\subtitle{Research Project Compiler Construction}
+\author{Benno Fünfstück}
+\date{October 7, 2021}
+
+\begin{document}
+
+\includeonlyframes{current}
+
+\tikzset{
+  onslide/.code args={<#1>#2}{%
+    \only<#1>{\pgfkeysalso{#2}}% \pgfkeysalso doesn't change the path
+  },
+  temporal/.code args={<#1>#2#3#4}{%
+    \temporal<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}{\pgfkeysalso{#4}}%
+  },
+  hidden/.style = {opacity=0},
+  uncover/.style = {temporal=#1{hidden}{}{hidden}},
+}
+
+\maketitle
+
+% 3 min
+\begin{frame}\frametitle{Intro}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[height=0.85\textheight]{./media/bug-captcha}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{enumerate}
+        \item Approach
+        \item Model
+        \item Data
+        \item Results
+        \item Summary
+      \end{enumerate}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Goal: Predict vulnerable functions}
+  % begin center somehow breaks the alignment of the lstlisting blocks
+  \hbox to \hsize{\hfil{%
+  \begin{tikzpicture}
+    \node[uncover=<1>, anchor=north west] (code1) {
+\begin{lstlisting}[language=C]
+int readNumber(void) {
+  char buf[32];
+  gets(buf);
+  buf[31] = '\0';
+  return atol(buf);
+}
+\end{lstlisting}
+      };
+
+      \node[uncover=<2>, anchor=north west] (code2) at (code1.north west) {
+\begin{lstlisting}[language=C]
+int readNumber(void) {
+  char buf[32];
+  fgets(buf, 32, stdin);
+  buf[31] = '\0';
+  return atol(buf);
+}
+\end{lstlisting}
+      };
+
+      \node[uncover=<3>, anchor=north west] (code3) at (code1.north west) {
+\begin{lstlisting}[language=C]
+int readNumber(void) {
+  char buf[32];
+  fgets(buf, 42, stdin);
+  buf[31] = '\0';
+  return atol(buf);
+}
+\end{lstlisting}
+      };
+
+      \node[uncover=<4>, anchor=north west] (code4) at (code1.north west) {
+\begin{lstlisting}[language=C]
+int readNumber(void) {
+  char buf[32];
+  fgets(buf, sizeof(buf), stdin);
+  buf[31] = '\0';
+  return atol(buf);
+}
+\end{lstlisting}
+      };
+
+      \node[red, below=40pt,onslide=<2>hidden,onslide=<4>hidden] (vuln) at (code1.south) { vulnerable };
+      \node[green!60!black, below=40pt, text width=75pt,onslide=<1>hidden,onslide=<3>hidden] (patched) at (code1.south) { not vulnerable \\ (patched) };
+
+      \path[draw,onslide=<2>hidden,onslide=<4>hidden] (code1) edge[->] node[left=7pt]{\emph{model}} (vuln);
+      \path[draw,onslide=<1>hidden,onslide=<3>hidden] (code1) edge[->] node[left=7pt]{\emph{model}} (patched);
+
+  \end{tikzpicture}%
+}\hfil}
+\end{frame}
+
+\section{Model}
+% preprocessing -> embedding -> propagation -> prediction
+
+\section{Data}
+
+\begin{frame}\frametitle{Real-World Vulnerabilities: CVE database}
+  \textbf{Common Vulnerabilities and Exposures (CVE)} \\
+  Community catalog of publicly disclosed cybersecurity vulnerabilities
+
+  \textbf{Common Weakness Enumeration (CWE)} \\
+  Community-developed list of software and hardware weakness types
+
+  \textbf{National Vulnerability Database (NVD)} \\
+  U.S. government repository of standards based vulnerability management data (includes CVE data)
+\end{frame}
+
+\begin{frame}[label=current]
+  \only<1>{
+  \includegraphics[width=\framewidth]{media/cve-2014-detail}
+  }
+  \only<2>{
+  \includegraphics[width=\framewidth]{media/cve-2014-refcwe}
+  }
+\end{frame}
+
+% ReVeal
+% Devign
+% Draper
+% SARD/SATE
+%
+
+\section{Results}
+
+% no model can fit the dataset
+% overfitting is possible, but no generalization
+% can detect whether it is likely to be involved in vulnerabilities, but not if it has been fixed or not
+
+\end{document}

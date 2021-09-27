@@ -3,3 +3,15 @@
 *.pyc
 __pycache__
 *.swp
+.idea
+*.aux
+*.synctex.gz
+main.pdf
+main.log
+*.nav
+*.snm
+*.toc
+*.vrb
+*.out
+.auctex-auto
+notes.org
