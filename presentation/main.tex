@@ -11,16 +11,19 @@
 \usepackage{appendixnumberbeamer}
 \usepackage{tikz}
 \usepackage{pifont}
+\usepackage{booktabs}
 \usetikzlibrary{positioning}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{shapes.geometric}
 \usetikzlibrary{calc}
 \usetikzlibrary{fit}
+\usetikzlibrary{graphs}
+\usetikzlibrary{matrix}
 \usepackage{upquote}
 
 \lstset{upquote=true}
 \metroset{block=fill}
-%\setsansfont[BoldFont={Fira Sans SemiBold}]{Fira Sans Book}
+\setsansfont[BoldFont={Fira Sans SemiBold}]{Fira Sans Book}
 \makeatletter
 \newlength\beamerleftmargin
 \setlength\beamerleftmargin{\Gm@lmargin}
@@ -33,7 +36,7 @@
 
 \begin{document}
 
-\includeonlyframes{current}
+%\includeonlyframes{current}
 
 \tikzset{
   onslide/.code args={<#1>#2}{%
@@ -44,88 +47,156 @@
   },
   hidden/.style = {opacity=0},
   uncover/.style = {temporal=#1{hidden}{}{hidden}},
+  drawalert/.style = {temporal=#1{}{color=alerted text.fg}{}}
+}
+
+\newcounter{tmlistings}
+
+\newcommand\makenode[2]{%
+  \tikz[baseline=0pt, remember picture] { \node[fill=gray!50,thick,rounded corners,anchor=base,#1/.try] (listings-\the\value{tmlistings}) {{\scriptsize\the\value{tmlistings}} #2}; }%
+  \stepcounter{tmlistings}%
 }
 
 \maketitle
 
-% 3 min
-\begin{frame}\frametitle{Intro}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \includegraphics[height=0.85\textheight]{./media/bug-captcha}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{enumerate}
-        \item Approach
-        \item Model
-        \item Data
-        \item Results
-        \item Summary
-      \end{enumerate}
-    \end{column}
-  \end{columns}
+\begin{frame}\frametitle{Deep learning for vulnerability detection}
+  {\mbox {\lower3.5pt\hbox{\hskip2pt\pgfuseimage{beamericonarticle}\hskip1pt}} Deep Program Structure Modeling Through Multi-Relational Graph-based Learning~\cite{ye_deep_2020}}
+
+  \vspace{10pt}
+
+  \begin{tabular}{lrrr}
+    \toprule
+    Metrics & µVuldeepecker & Lin et al. & {\bfseries POEM} \\
+    \midrule
+    C Accuracy & 80.0\% & 88.0\% & \bfseries{90.9\%} \\
+    C FPR      & 31.6\% & 30.5\% & \bfseries{3.1\%} \\
+    C FNR      & 9.4\%  & \bfseries{7.1\%}  & 8.9\% \\
+    \bottomrule
+  \end{tabular}
+
+  (Dataset: ``collected from standard vulnerable code databases'')
 \end{frame}
 
-\begin{frame}[fragile]\frametitle{Goal: Predict vulnerable functions}
-  % begin center somehow breaks the alignment of the lstlisting blocks
-  \hbox to \hsize{\hfil{%
+\begin{frame}<1>[label=overall]\frametitle{Overall structure: binary classification of functions}
   \begin{tikzpicture}
-    \node[uncover=<1>, anchor=north west] (code1) {
-\begin{lstlisting}[language=C]
-int readNumber(void) {
-  char buf[32];
-  gets(buf);
-  buf[31] = '\0';
-  return atol(buf);
-}
-\end{lstlisting}
-      };
+    \matrix[row sep=20pt, nodes={minimum width=80pt, inner ysep=5pt}] (layers) {
+      \node       (inp) {input sample}; \\
+      \node[draw,drawalert=<2>] (emb) {embedding}; \\
+      \node[draw,drawalert=<3>] (rep) {representation}; \\
+      \node[draw,drawalert=<4>] (ext) {extraction}; \\
+      \node       (out) {prediction}; \\
+    };
 
-      \node[uncover=<2>, anchor=north west] (code2) at (code1.north west) {
-\begin{lstlisting}[language=C]
-int readNumber(void) {
-  char buf[32];
-  fgets(buf, 32, stdin);
-  buf[31] = '\0';
-  return atol(buf);
-}
-\end{lstlisting}
-      };
+    \node[above right=10pt and 70pt of rep, text width=130pt] (seq-rnn) {sequence-based RNN};
+    \node[right=10pt and 70pt of rep, text width=130pt] (graph-ggnn) {graph-based GGNN \cite{li_gated_2017}};
+    \node[below right=10pt and 70pt of rep, text width=130pt] (combined-sandwich) {sandwich model \cite{hellendoorn_global_2019}};
 
-      \node[uncover=<3>, anchor=north west] (code3) at (code1.north west) {
-\begin{lstlisting}[language=C]
-int readNumber(void) {
-  char buf[32];
-  fgets(buf, 42, stdin);
-  buf[31] = '\0';
-  return atol(buf);
-}
-\end{lstlisting}
-      };
+    \node[right=70pt of inp] (functions) {\bfseries functions};
+    \node[right=70pt of out,text width=95pt] (vuln) {\bfseries \hfill not vulnerable (0)\\ \hfill vulnerable (1)};
 
-      \node[uncover=<4>, anchor=north west] (code4) at (code1.north west) {
-\begin{lstlisting}[language=C]
-int readNumber(void) {
-  char buf[32];
-  fgets(buf, sizeof(buf), stdin);
-  buf[31] = '\0';
-  return atol(buf);
-}
-\end{lstlisting}
-      };
+    \graph { (inp) -> (emb) -> (rep) -> (ext) -> (out) };
 
-      \node[red, below=40pt,onslide=<2>hidden,onslide=<4>hidden] (vuln) at (code1.south) { vulnerable };
-      \node[green!60!black, below=40pt, text width=75pt,onslide=<1>hidden,onslide=<3>hidden] (patched) at (code1.south) { not vulnerable \\ (patched) };
+    \draw[dashed]
+      (rep.east) -- (seq-rnn.north west) -- ({$(combined-sandwich.south east)$} |- {$(seq-rnn.north east)$}) -- (combined-sandwich.south east) -- (combined-sandwich.south west) -- cycle;
+    \draw[dashed, <-] (inp) -- (functions);
+    \draw[dashed, ->] (out) -- (vuln);
+  \end{tikzpicture}
+\end{frame}
 
-      \path[draw,onslide=<2>hidden,onslide=<4>hidden] (code1) edge[->] node[left=7pt]{\emph{model}} (vuln);
-      \path[draw,onslide=<1>hidden,onslide=<3>hidden] (code1) edge[->] node[left=7pt]{\emph{model}} (patched);
 
-  \end{tikzpicture}%
-}\hfil}
+\begin{frame}\frametitle{Are sandwich models better for vulnerability prediction?}
+  \begin{exampleblock}{Goal}
+    Evaluate the sandwich model from Hellendoorn et al. on the task of vulnerability detection
+  \end{exampleblock}
+
+  \begin{enumerate}
+    \item Implement in Compy-Learn~\cite{brauckmann_compy-learn_2020}
+    \item Review existing datasets for ML vulnerability discovery
+    \item Evaluate the model on \emph{real world data}
+  \end{enumerate}
 \end{frame}
 
 \section{Model}
-% preprocessing -> embedding -> propagation -> prediction
+
+\begin{frame}[fragile]\frametitle{A sample function}
+
+\begin{lstlisting}[language=C, morekeywords={uint8_t},
+  emph={buf}, emphstyle=\color{green!60!black},
+  emph={[2]out}, emphstyle={[2]\color{blue!90!black}},
+  emph={[3]pkt_len}, emphstyle={[3]\color{cyan!80!black}},
+  emph={[4]i}, emphstyle={[4]\color{alert}},
+]
+int decode_packet(char *buf, char *out) {
+  uint8_t pkt_len = buf[0];
+  for (int i = 0; i < pkt_len; ++i) {
+    out[i] = buf[i + 1];
+  }
+  return pkt_len;
+}
+\end{lstlisting}
+
+  \vspace{10pt}
+
+  \begin{tikzpicture}[
+    keyword/.style = {font=\bfseries},
+    buf/.style = { text=green!60!black },
+    uncover=<2->
+    ]
+    \matrix[matrix of nodes, column sep=5pt, row sep=20pt, ampersand replacement=\&, nodes={
+      draw, minimum height=20pt, anchor=north, text height=10pt, text depth=3pt,
+    }] {
+      |[keyword] (n0)|int \& |(n1)| decode\_packet \& |[inner xsep=23pt] (n2)| ( \& |[keyword] (n3)|char \& |[inner xsep=10pt] (n4)| * \& |[buf] (n5)|buf \& |[draw=none]| {\large$\cdots$}  \\
+    };
+    \node[anchor=north west, inner xsep=0pt] at (n0.south west) { int };
+    \node[anchor=north west, inner xsep=0pt] at (n1.south west) { identifier };
+    \node[anchor=north west, inner xsep=0pt] at (n2.south west) { l\_paren };
+    \node[anchor=north west, inner xsep=0pt] at (n3.south west) { char };
+    \node[anchor=north west, inner xsep=0pt] at (n4.south west) { star };
+    \node[anchor=north west, inner xsep=0pt] at (n5.south west) { identifier };
+
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}[t]\frametitle{Recurrent Neural Networks (RNN)}
+  \begin{tikzpicture}[
+    keyword/.style = {font=\bfseries},
+    buf/.style = { text=green!60!black },
+    ]
+    \matrix[matrix of nodes, column sep=5pt, row sep=0pt, ampersand replacement=\&, nodes={
+      draw, minimum height=20pt, anchor=north, text height=10pt, text depth=3pt,
+    }] {
+      |[keyword] (n0)|int \& |(n1)| decode\_packet \& |[inner xsep=23pt] (n2)| ( \& |[keyword] (n3)|char \& |[inner xsep=10pt] (n4)| * \& |[buf] (n5)|buf \& |[draw=none]| {\large$\cdots$}  \\
+      |[draw=none]| int   \& |[draw=none]| identifier \& |[draw=none]| l\_paren \& |[draw=none]| char \& |[draw=none]| star \& |[draw=none]| identifier \& \\
+    };
+
+    % \node[anchor=north west, inner xsep=0pt] at (n0.south west) { int };
+    % \node[anchor=north west, inner xsep=0pt] at (n1.south west) { identifier };
+    % \node[anchor=north west, inner xsep=0pt] at (n2.south west) { l\_paren };
+    % \node[anchor=north west, inner xsep=0pt] at (n3.south west) { char };
+    % \node[anchor=north west, inner xsep=0pt] at (n4.south west) { star };
+    % \node[anchor=north west, inner xsep=0pt] at (n5.south west) { identifier };
+
+
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}\frametitle{Recurrent Neural Networks (RNN)}
+\end{frame}
+
+\begin{frame}\frametitle{Representation as Graph: augmented AST}
+\end{frame}
+
+\begin{frame}\frametitle{Gated Graph Neural Networks (GGNN)}
+\end{frame}
+
+\begin{frame}\frametitle{Sandwich models: Combining GGNNs and RNNs}
+\end{frame}
+
+\begin{frame}\frametitle{Batching for sandwich models}
+\end{frame}
+
+\begin{frame}\frametitle{Extraction: Global Attentation}
+\end{frame}
 
 \section{Data}
 
@@ -160,5 +231,14 @@ int readNumber(void) {
 % no model can fit the dataset
 % overfitting is possible, but no generalization
 % can detect whether it is likely to be involved in vulnerabilities, but not if it has been fixed or not
+
+
+\appendix
+
+\begin{frame}[allowframebreaks]{References}
+  \bibliography{zotero}
+  \bibliographystyle{apalike}
+\end{frame}
+
 
 \end{document}

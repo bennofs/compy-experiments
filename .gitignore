@@ -13,5 +13,10 @@ main.log
 *.toc
 *.vrb
 *.out
+*.fls
+*.xdv
+*.bbl
+*.fdb_latexmk
+*.blg
 .auctex-auto
 notes.org
