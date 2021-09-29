@@ -1,6 +1,6 @@
 import argparse
 import json
-import os.path
+import os
 import pickle
 from pathlib import Path
 
@@ -11,7 +11,7 @@ from sklearn.model_selection import StratifiedKFold
 from compy.models.graphs.tf2_sandwich_model import sandwich_model
 
 CONFIG = {
-    'layers': ['rnn'],
+    'layers': ['ggnn'],
     'batch_size': 32,
     'learning_rate': 0.001,
     'base': {
@@ -21,7 +21,7 @@ CONFIG = {
         'dropout_rate': 0.1,
     },
     'ggnn': {
-        'time_steps': [3],
+        'time_steps': [3, 1, 3, 1],
         'residuals': {'1': [0]},
         'add_type_bias': True,
     },
@@ -107,7 +107,10 @@ def main(args):
     data_name = os.path.basename(args.data)
     with open(args.data, 'rb') as f:
         data = pickle.load(f)
+
+    # Filter samples which are too long
     samples = np.array(data['samples'])
+    print("total samples: {}".format(len(samples)))
 
     CONFIG['base']['num_edge_types'] = int(max(max(s['x']['code_rep'].edges[0]) for s in samples) + 1)
     CONFIG['base']['hidden_size_orig'] = int(data['num_types'])
@@ -116,9 +119,6 @@ def main(args):
 
     with open('config.json', 'w') as f:
         json.dump(CONFIG, f)
-
-
-    print("total samples: {}".format(len(samples)))
 
     # Determine number of parameters
     global MODEL # global for interactive debugging
@@ -143,7 +143,7 @@ def main(args):
         opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
         history_callback = model.fit(train_data, validation_data=test_data, epochs=250, callbacks=[
-            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-logs-rnn-only/{data_name}/{i:02}-{args.hidden}h-{args.dropout}do'),
+            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-train-ggnn/{data_name}/{i:02}-{args.hidden}h-{args.dropout}do'),
             tf.keras.callbacks.ModelCheckpoint(f'{args.hidden}h-{args.dropout}do-{i:02}-{{epoch:03}}.h5', save_weights_only=True)
         ])
         with open(f'{args.hidden}h-{args.dropout}do-{i:02}-metrics.json', 'w') as f:
