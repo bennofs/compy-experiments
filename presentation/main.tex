@@ -1,6 +1,6 @@
-\documentclass[169]{beamer}
+\documentclass[169,xcolor=table]{beamer}
 
-\usetheme[numbering=fraction]{metropolis}
+\usetheme{ccc}
 
 \usepackage{polyglossia}
 \usepackage{csquotes}
@@ -12,6 +12,7 @@
 \usepackage{tikz}
 \usepackage{pifont}
 \usepackage{booktabs}
+\usepackage{changepage}
 \usetikzlibrary{positioning}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{shapes.geometric}
@@ -20,10 +21,14 @@
 \usetikzlibrary{graphs}
 \usetikzlibrary{matrix}
 \usepackage{upquote}
+\usepackage{biblatex}
+
+\definecolor{lightgray}{gray}{0.9}
+
+\addbibresource{zotero.bib}
 
 \lstset{upquote=true}
-\metroset{block=fill}
-\setsansfont[BoldFont={Fira Sans SemiBold}]{Fira Sans Book}
+%\setsansfont[BoldFont={Fira Sans SemiBold}]{Fira Sans Book}
 \makeatletter
 \newlength\beamerleftmargin
 \setlength\beamerleftmargin{\Gm@lmargin}
@@ -60,10 +65,6 @@
 \maketitle
 
 \begin{frame}\frametitle{Deep learning for vulnerability detection}
-  {\mbox {\lower3.5pt\hbox{\hskip2pt\pgfuseimage{beamericonarticle}\hskip1pt}} Deep Program Structure Modeling Through Multi-Relational Graph-based Learning~\cite{ye_deep_2020}}
-
-  \vspace{10pt}
-
   \begin{tabular}{lrrr}
     \toprule
     Metrics & µVuldeepecker & Lin et al. & {\bfseries POEM} \\
@@ -74,6 +75,8 @@
     \bottomrule
   \end{tabular}
 
+  \fullcite{ye_deep_2020}
+
   (Dataset: ``collected from standard vulnerable code databases'')
 \end{frame}
 
@@ -81,9 +84,9 @@
   \begin{tikzpicture}
     \matrix[row sep=20pt, nodes={minimum width=80pt, inner ysep=5pt}] (layers) {
       \node       (inp) {input sample}; \\
-      \node[draw,drawalert=<2>] (emb) {embedding}; \\
-      \node[draw,drawalert=<3>] (rep) {representation}; \\
-      \node[draw,drawalert=<4>] (ext) {extraction}; \\
+      \node[draw,drawalert=<2>] (emb) {initialisation}; \\
+      \node[draw,drawalert=<3>] (rep) {model}; \\
+      \node[draw,drawalert=<4>] (ext) {output}; \\
       \node       (out) {prediction}; \\
     };
 
@@ -180,13 +183,13 @@ int decode_packet(char *buf, char *out) {
   \end{tikzpicture}
 \end{frame}
 
-\begin{frame}\frametitle{Recurrent Neural Networks (RNN)}
-\end{frame}
-
 \begin{frame}\frametitle{Representation as Graph: augmented AST}
 \end{frame}
 
 \begin{frame}\frametitle{Gated Graph Neural Networks (GGNN)}
+\end{frame}
+
+\begin{frame}\frametitle{Extraction: Global Attentation}
 \end{frame}
 
 \begin{frame}\frametitle{Sandwich models: Combining GGNNs and RNNs}
@@ -195,29 +198,93 @@ int decode_packet(char *buf, char *out) {
 \begin{frame}\frametitle{Batching for sandwich models}
 \end{frame}
 
-\begin{frame}\frametitle{Extraction: Global Attentation}
-\end{frame}
 
 \section{Data}
 
-\begin{frame}\frametitle{Real-World Vulnerabilities: CVE database}
-  \textbf{Common Vulnerabilities and Exposures (CVE)} \\
-  Community catalog of publicly disclosed cybersecurity vulnerabilities
-
-  \textbf{Common Weakness Enumeration (CWE)} \\
-  Community-developed list of software and hardware weakness types
-
-  \textbf{National Vulnerability Database (NVD)} \\
-  U.S. government repository of standards based vulnerability management data (includes CVE data)
-\end{frame}
-
-\begin{frame}[label=current]
+\begin{frame}\frametitle{A real world vulnerability (National Vulnerability Database)}
   \only<1>{
-  \includegraphics[width=\framewidth]{media/cve-2014-detail}
+  \includegraphics[width=\framewidth]{media/cve-2014-summary}
   }
   \only<2>{
-  \includegraphics[width=\framewidth]{media/cve-2014-refcwe}
+  \includegraphics[width=\framewidth]{media/cve-2014-ref}
   }
+  \only<3>{
+  \includegraphics[width=\framewidth]{media/xdelta-commit}
+  }
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{The bug}
+  \begin{adjustwidth}{-0.5em}{-1.5em}
+  \begin{lstlisting}[numbers=left, language=C, emph={parsed}, emphstyle={\alert}, emph={[2]place}, emphstyle={[2]\color{brown!60!black}}]
+xd3_get_appheader (stream, & apphead, & appheadsz);
+
+char *start = (char*)apphead;
+char *slash;
+int   place = 0;
+char *parsed[4];
+memset (parsed, 0, sizeof (parsed));
+
+while ((slash = strchr (start, '/')) != NULL) {
+  *slash = 0;
+  parsed[place++] = start;
+  start = slash + 1;
+}
+  \end{lstlisting}
+  \end{adjustwidth}
+\end{frame}
+
+\begin{frame}\frametitle{Existing datasets}
+  % diversity
+  % label precision
+  % size
+  % naturalness
+  \rowcolors[]{1}{}{lightgray}
+  \begin{tabular}{p{11em}p{15em}}
+    \toprule
+    name & description \\
+    \midrule
+    SARD/SATE & synthetic, by CWE, originally for testing static analyzers \\
+    Draper \cite{russell_automated_2018} & code from Debian/GitHub, labels from static analyzer \\
+    Devign \cite{zhou_devign_2019} & ffmpeg/qemu commits filtered by keyword and manual review \\
+    ReVeal \cite{chakraborty_deep_2020}& CVEs from debian, labels mined from git diff \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[label=current]\frametitle{Challenge 1: compilation}
+  \begin{tikzpicture}
+    \def\lwidth{0.1pt};
+    \begin{scope}[local bounding box=samples]
+     \def\corner{0.15in};
+     \def\cornerradius{0.02in};
+     \def\h{1.7cm};
+     \def\w{2cm};
+     \foreach \i in {0,1,2} {
+     \coordinate (nw) at ($(-0.05in*\i,-0.06in*\i)$);
+     \coordinate (ne0) at ($(nw) + (\w, 0)$);
+     \coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+     \coordinate (ne2) at ($(ne0) - (0, \corner)$);
+     \coordinate (se) at ($(ne0) + (0, -\h)$);
+     \filldraw [-, line width = \lwidth, fill=white] (nw) -- (ne1) -- (ne2)
+     [rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+     \draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+     }
+     \node[anchor=north west,node distance=0] at (-0.05in,-0.8) {Samples};
+    \end{scope}
+
+    \matrix[above right=1em and 1em of samples, column sep=0pt, ampersand replacement=\&] (debian) {
+      \node[anchor=center] {\includegraphics[width=2em]{media/debian-openlogo-nd}}; \& \node[anchor=base]{Deb. Package}; \\
+    };
+
+    % \begin{scope}[local bounding box=compiling, below left=1em of debian]
+    %   \foreach \angle in {0, 60, ..., 360} {
+    %     \draw[fill=black] (0,0) -- (\angle-30:0.7cm) -- (\angle-30+8:0.7cm) -- (\angle-13:1cm) -- (\angle+13:1cm) -- (\angle+30-8:0.7cm) -- (\angle+30:0.7cm) -- cycle;
+    %   };
+    %   \draw[fill=white] (0,0) circle [radius=0.3];
+    % \end{scope}
+
+    \draw[dashed,->] (samples) |- (debian);
+  \end{tikzpicture}
 \end{frame}
 
 % ReVeal
@@ -226,18 +293,47 @@ int decode_packet(char *buf, char *out) {
 % SARD/SATE
 %
 
+\begin{frame}\frametitle{Challenge 2: dataset is noisy}
+  \includegraphics[width=\framewidth]{media/reveal-unbalanced}
+\end{frame}
+
 \section{Results}
 
-% no model can fit the dataset
-% overfitting is possible, but no generalization
-% can detect whether it is likely to be involved in vulnerabilities, but not if it has been fixed or not
 
+\begin{frame}\frametitle{Model can fit the training data}
+
+\end{frame}
+
+\begin{frame}\frametitle{Model does not generalize}
+\end{frame}
+
+\begin{frame}\frametitle{Future directions}
+  {\bfseries 1. improve embedding}: embed identifier names, simplify graphs \\
+  \vspace{4em}
+  {\bfseries 2. better dataset}: clean with heuristic, other sources (OSS Fuzz, Joern)
+\end{frame}
+
+\begin{frame}\frametitle{Summary}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{enumerate}
+        \item succefully implemented sandwich model using compy learn
+        \item no model able to generalize on real world data
+        \item real world data is hard to find, need better datasets first
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \only<2>{
+      \includegraphics[width=0.8\textwidth]{media/bug-captcha}
+      }
+    \end{column}
+  \end{columns}
+\end{frame}
 
 \appendix
 
 \begin{frame}[allowframebreaks]{References}
-  \bibliography{zotero}
-  \bibliographystyle{apalike}
+  \printbibliography
 \end{frame}
 
 

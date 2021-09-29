@@ -1,0 +1,177 @@
+\mode<presentation>
+
+\def\beamer@andinst{\\[0.5em]}
+
+\setbeamertemplate{background}{
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle(\the\paperwidth,\the\paperheight);
+    % the header
+    \fill[gray, anchor=north west] (0,\the\paperheight) rectangle(\the\paperwidth,\paperheight-1.4cm);
+    % ccc logo on the left (only on title page)
+    \ifnum\thepage=1\relax%
+    \node[anchor=west, inner sep=0] (header) at (0.25cm,\paperheight-0.7cm) {
+          \includegraphics[width=90bp]{ccc_img/cclogo.pdf}};
+    \fi
+    % cfaed logo on the right (only on title page or if cfaedlogo is set)
+    \ifbeamer@cfaedlogo
+    \node[anchor=east, inner sep=0] (header) at (\paperwidth-0.25cm,\paperheight-0.7cm) {
+      \includegraphics[width=60bp]{ccc_img/cfaed.png}};
+    \else
+    \ifnum\thepage=1\relax%
+    \node[anchor=east, inner sep=0] (header) at (\paperwidth-0.25cm,\paperheight-0.7cm) {
+          \includegraphics[width=60bp]{ccc_img/cfaed.png}};
+    \fi
+    \fi
+    % the footer
+    \node[anchor=south west, inner sep=0] (footer) at (0,0) {
+      \ifnum\thepage=1\relax%
+      \includegraphics[width=\paperwidth]{ccc_img/titlefooter.png}
+      \fi
+      \includegraphics[width=\paperwidth]{ccc_img/footer.png}};
+    \ifnum\thepage>1\relax%
+    % page number on the left
+    \node[anchor=west, inner sep=0] (pagenum) at (0.2,0.55) {
+      \usebeamerfont{pagenum}\usebeamercolor[fg]{pagenum}\insertframenumber};
+    % page ccc logo on the right
+    \ifbeamer@ccclogo
+    \node[anchor=east, inner sep=0] (pagenum) at (\paperwidth-0.2,0.55) {
+      \includegraphics[width=50pt]{ccc_img/cclogo.pdf}};
+    \fi
+    \fi
+  \end{tikzpicture}
+}
+
+\defbeamertemplate*{title page}{ccc}[1][]{
+  \vskip1cm%
+  \begin{beamercolorbox}[wd=\textwidth,#1]{title page header}
+    \usebeamerfont{title}\inserttitle\par%
+    \medskip
+    \usebeamerfont{subtitle}\insertsubtitle\par%
+  \end{beamercolorbox}%
+  \vskip0.5cm%
+  \begin{beamercolorbox}[wd=\textwidth,#1]{author}
+    \usebeamerfont{author}\insertauthor%
+  \end{beamercolorbox}
+  \vskip0.5cm%
+  \begin{beamercolorbox}[wd=\textwidth,#1]{institute}
+    \usebeamerfont{institute}\insertinstitute%
+  \end{beamercolorbox}
+  \vskip0.5cm%
+  \begin{beamercolorbox}[wd=\textwidth,#1]{date}
+    \usebeamerfont{date}\insertdate%
+  \end{beamercolorbox}
+  \vfill
+}
+
+% Frame title
+\defbeamertemplate*{frametitle}{ccc}[1][]
+{
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle(\textwidth,1.4cm);
+    \ifx\insertframesubtitle\@empty%
+    \node[anchor=west, inner sep=0, text width=\textwidth, align=left] at (0,0.7){
+      \usebeamerfont{frametitle}\insertframetitle};
+    \else
+    \node[anchor=west, inner sep=0, text width=\textwidth, align=left] at (0,0.7){
+      \usebeamerfont{frametitle}\insertframetitle\\
+      \usebeamerfont{framesubtitle}\insertframesubtitle};
+    \fi
+  \end{tikzpicture}
+}
+
+\defbeamertemplate*{block begin}{ccc}
+{
+  \par\vskip\medskipamount%
+  \usebeamercolor{block title}
+  \begin{tikzpicture}
+    \node [
+      draw=fg, inner sep=1ex,
+      text width=\textwidth-2ex-1pt,
+      minimum width=\textwidth-1pt,
+      rounded corners
+    ] (BOXCONTENT) \bgroup%
+    \ifx\insertblocktitle\@empty\else\par\fi
+    \usebeamerfont{block body}
+    \usebeamercolor[fg]{block body}
+}
+
+\defbeamertemplate*{block end}{ccc}
+{
+  \egroup;
+  \usebeamercolor{block title}
+  \ifx\insertblocktitle\@empty
+  \else{
+    \node[ fill=bg, anchor=west, text=fg, rounded corners ] at
+      ([shift={(5pt,0)}]BOXCONTENT.north west) {\insertblocktitle};
+  }
+  \fi
+  \end{tikzpicture}
+  \vskip\smallskipamount
+}
+
+\defbeamertemplate*{block example begin}{ccc}
+{
+  \par\vskip\medskipamount%
+  \usebeamercolor{block title example}
+  \begin{tikzpicture}
+    \node [
+      draw=fg, inner sep=1ex,
+      text width=\textwidth-2ex-1pt,
+      minimum width=\textwidth-1pt,
+      rounded corners
+    ] (BOXCONTENT) \bgroup%
+    \ifx\insertblocktitle\@empty\else\par\fi
+    \usebeamerfont{block body}
+    \usebeamercolor[fg]{block body}
+}
+
+\defbeamertemplate*{block example end}{ccc}
+{
+  \egroup;
+  \usebeamercolor{block title example}
+  \ifx\insertblocktitle\@empty
+  \else%
+  {
+    \node [ fill=bg, anchor=west, text=fg, rounded corners]
+      at ([shift={(5pt,0)}]BOXCONTENT.north west) {\insertblocktitle};
+  }
+  \fi
+  \end{tikzpicture}
+  \vskip\smallskipamount
+}
+
+\defbeamertemplate*{block alerted begin}{ccc}
+{
+  \par\vskip\medskipamount%
+  \usebeamercolor{block title alerted}
+  \begin{tikzpicture}
+    \node [
+      draw=fg, inner sep=1ex,
+      text width=\textwidth-2ex-1pt,
+      minimum width=\textwidth-1pt,
+      rounded corners
+    ] (BOXCONTENT) \bgroup%
+    \ifx\insertblocktitle\@empty\else\par\fi
+    \usebeamerfont{block body}
+    \usebeamercolor[fg]{block body}
+}
+
+\defbeamertemplate*{block alerted end}{ccc}
+{
+  \egroup;
+  \usebeamercolor{block title alerted}
+  \ifx\insertblocktitle\@empty
+  \else%
+  {
+    \node [fill=bg, anchor=west, text=fg, rounded corners] at
+      ([shift={(5pt,0)}]BOXCONTENT.north west) {\insertblocktitle};
+  }
+  \fi
+  \end{tikzpicture}
+  \vskip\smallskipamount
+}
+
+% Items
+\setbeamertemplate{itemize items}{\Squarepipe}
+
+\mode<all>

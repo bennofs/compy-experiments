@@ -20,3 +20,4 @@ main.log
 *.blg
 .auctex-auto
 notes.org
+.latex-cache

@@ -1,0 +1,31 @@
+\newif\ifbeamer@cfaedlogo
+\beamer@cfaedlogofalse
+\DeclareOptionBeamer{cfaedlogo}{\beamer@cfaedlogotrue}
+\ProcessOptionsBeamer
+
+\newif\ifbeamer@ccclogo
+\beamer@ccclogotrue
+\DeclareOptionBeamer{noccclogo}{\beamer@ccclogofalse}
+\ProcessOptionsBeamer
+
+\mode<presentation>
+
+% Requirement
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{fontspec}
+\RequirePackage{marvosym}
+
+% Settings
+\useinnertheme{ccc}
+\useoutertheme{ccc}
+\usecolortheme{ccc}
+\usefonttheme{ccc}
+
+% Set the font
+\setsansfont{Open Sans}
+
+% disable navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+\mode<all>
