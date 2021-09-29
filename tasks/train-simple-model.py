@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import pickle
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from sklearn.model_selection import StratifiedKFold
 from compy.models.graphs.tf2_sandwich_model import sandwich_model
 
 CONFIG = {
-    'layers': ['ggnn'],
+    'layers': ['rnn', 'ggnn', 'rnn'],
     'batch_size': 32,
     'learning_rate': 0.001,
     'base': {
@@ -102,16 +103,13 @@ def main(args):
     tf.compat.v1.enable_eager_execution()
     tf.compat.v1.enable_v2_behavior()
 
+    print("load data from:", args.data)
+    data_name = os.path.basename(args.data)
     with open(args.data, 'rb') as f:
         data = pickle.load(f)
 
-    # Filter samples which are too long
-    samples = [s for s in data['samples'] if s['x']['code_rep'].seq_len <= 1500]
-
-    # downsample negative samples for 50/50 split
-    samples_negative = [sample for sample in samples if not sample['y']]
-    samples_positive = [sample for sample in samples if sample['y']]
-    assert len(samples_negative) > len(samples_positive)
+    samples = np.array(data['samples'])
+    print("total samples: {}".format(len(samples)))
 
     CONFIG['base']['num_edge_types'] = int(max(max(s['x']['code_rep'].edges[0]) for s in samples) + 1)
     CONFIG['base']['hidden_size_orig'] = int(data['num_types'])
@@ -121,35 +119,30 @@ def main(args):
     with open('config.json', 'w') as f:
         json.dump(CONFIG, f)
 
-    rng = np.random.default_rng(seed=0)
-    samples_negative_downsampled = rng.choice(samples_negative, size=len(samples_positive), replace=False)
-    balanced_samples = np.append(samples_negative_downsampled, samples_positive)
-    print("total samples: {}".format(len(balanced_samples)))
-
     # Determine number of parameters
     global MODEL # global for interactive debugging
     MODEL = sandwich_model(CONFIG, rnn_dense=True)
     opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
     MODEL.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
-    sample_input, sample_label = next(iter(make_dataset(balanced_samples[:1])))
+    sample_input, sample_label = next(iter(make_dataset(samples[:1])))
     MODEL(sample_input)
     print("parameter count", MODEL.count_params())
 
     # Train and test
     kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=204)
-    split = kf.split(balanced_samples, [sample["y"] for sample in balanced_samples])
+    split = kf.split(samples, [sample["y"] for sample in samples])
     for i, (train_idx, test_idx) in enumerate(split):
         rng = np.random.default_rng(seed=0)
-        train_samples = balanced_samples[train_idx]
+        train_samples = samples[train_idx]
         rng.shuffle(train_samples)
         train_data = make_dataset(train_samples)
-        test_data = make_dataset(balanced_samples[test_idx])
+        test_data = make_dataset(samples[test_idx])
 
         model = sandwich_model(CONFIG, rnn_dense=True)
         opt = tf.keras.optimizers.Adam(learning_rate=CONFIG['learning_rate'])
         model.compile(opt, 'sparse_categorical_crossentropy', metrics=['accuracy'])
         history_callback = model.fit(train_data, validation_data=test_data, epochs=250, callbacks=[
-            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-logs-train-simple/{i:02}-{args.hidden}h-{args.dropout}do'),
+            tf.keras.callbacks.TensorBoard(Path.home() / f'tb-logs-simple/{data_name}/{i:02}-{args.hidden}h-{args.dropout}do'),
             tf.keras.callbacks.ModelCheckpoint(f'{args.hidden}h-{args.dropout}do-{i:02}-{{epoch:03}}.h5', save_weights_only=True)
         ])
         with open(f'{args.hidden}h-{args.dropout}do-{i:02}-metrics.json', 'w') as f:
