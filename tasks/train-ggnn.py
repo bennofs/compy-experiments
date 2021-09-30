@@ -116,6 +116,7 @@ def main(args):
     CONFIG['base']['hidden_size_orig'] = int(data['num_types'])
     CONFIG['base']['hidden_dim'] = int(args.hidden)
     CONFIG['base']['dropout_rate'] = float(args.dropout)
+    CONFIG['ggnn']['time_steps'] = [int(x) for x in args.timesteps.split(" ")]
 
     with open('config.json', 'w') as f:
         json.dump(CONFIG, f)
@@ -156,5 +157,6 @@ if __name__ == '__main__':
     parser.add_argument("--vocab", metavar="VOCAB", help="Saved vocabulary for the dataset", default="cvevulns-tokens.vocab.bin.npz")
     parser.add_argument('--hidden', metavar="DIM", help="Hidden state dimension")
     parser.add_argument('--dropout', metavar="RATE", help="Dropout rate for training")
+    parser.add_argument('--timesteps', help="Timesteps to use (as list of integers)", default="3 1 3 1")
 
     main(parser.parse_args())
