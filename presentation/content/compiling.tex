@@ -1,0 +1,42 @@
+\begin{tikzpicture}
+  \def\lwidth{0.1pt};
+  \begin{scope}[local bounding box=samples]
+    \def\corner{0.15in};
+    \def\cornerradius{0.02in};
+    \def\h{1.7cm};
+    \def\w{2cm};
+    \foreach \i in {0,1,2} {
+    \coordinate (nw) at ($(-0.05in*\i,-0.06in*\i)$);
+    \coordinate (ne0) at ($(nw) + (\w, 0)$);
+    \coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+    \coordinate (ne2) at ($(ne0) - (0, \corner)$);
+    \coordinate (se) at ($(ne0) + (0, -\h)$);
+    \filldraw [-, line width = \lwidth, fill=white] (nw) -- (ne1) -- (ne2)
+    [rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+    \draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+    }
+    \node[anchor=north west,node distance=0] at (-0.05in,-0.8) {Samples};
+  \end{scope}
+
+  \matrix[ right=6em of samples, column sep=0pt, ampersand replacement=\&] (debian) {
+    \node[anchor=center] {\includegraphics[width=2em]{media/debian-openlogo-nd}}; \& \node[anchor=base, name=deb-pkg, outer sep=0.5em]{Deb. Package}; \\
+  };
+
+  \matrix[above={3em of debian}, column sep=0pt, ampersand replacement=\&] (trace) {
+    \node[anchor=center] {\includegraphics[width=2em]{media/glass}}; \& \node[anchor=base, yshift=-0.15em]{Build Trace}; \\
+  };
+
+  \matrix[above right={2em and 6em of trace.center}, column sep=0pt, ampersand replacement=\&] (compy) {
+    \node[anchor=center] {\includegraphics[width=4em]{media/llvm-logo-deriv1}}; \& \node[anchor=base, yshift=-0.15em]{ComPy-Learn}; \\
+  };
+
+  \draw[thick]
+    (samples) edge[bend right=20, in=-120, out=-45, ->] node[above=0.6em, sloped]{\small\emph{1. link via CVE}} (deb-pkg.center |- deb-pkg.south)
+    (deb-pkg) edge[->] node[right=0.6em]{\small\emph{2. record build commands}} (deb-pkg |- trace.south)
+    (deb-pkg |- trace.north) edge[out=90, in=180, ->] node[left=0.8em]{\small\emph{3. extract compile flags}} (compy)
+  ;
+
+\end{tikzpicture}
+%%% Local Variables:
+%%% TeX-master: "../scratch.tex"
+%%% End:

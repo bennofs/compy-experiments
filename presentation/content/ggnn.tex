@@ -1,0 +1,136 @@
+  \begin{tikzpicture}[
+    vbuf/.style = {}, % text=green!60!black },
+    vi/.style = {}, % text=red!80!black },
+    vout/.style = {}, % { text=blue!90!black },
+    tokenedge/.style = {color=bGreen},
+    dataedge/.style = {color=bBlue},
+    cfgedge/.style = {color=bPurple},
+    dimmed/.append style = {opacity=0.2},
+    remember picture
+  ]
+    \def\A{\begin{bmatrix}1 & 2\end{bmatrix}}
+    \def\B{\begin{bmatrix}2 & 3\end{bmatrix}}
+    \def\C{\begin{bmatrix}2 & 2\end{bmatrix}}
+    \def\D{\begin{bmatrix}1 & 1\end{bmatrix}}
+    \def\E{\begin{bmatrix}2 & 3\end{bmatrix}}
+    \def\F{\begin{bmatrix}0 & 2\end{bmatrix}}
+    \def\G{\begin{bmatrix}4 & 3\end{bmatrix}}
+
+    \matrix[ampersand replacement=\&, column sep=0.5em, row sep=1em, nodes={font=\scriptsize, anchor=base, fill=pCyan, inner sep=0.2em, rounded corners=2pt, text height=7pt, text depth=2pt},
+      row 6/.append style = {every node/.append style={fill=pGreen}},
+      row 1/.append style = {onslide=<6-6>{dimmed}},
+      row 2/.append style = {onslide=<2-6>{dimmed}},
+      row 3/.append style = {onslide=<2-6>{dimmed}},
+      row 4/.append style = {onslide=<2-6>{dimmed}},
+      row 5/.append style = {onslide=<2-6>{dimmed}},
+      row 6/.append style = {onslide=<2-5>{dimmed}},
+    ] {
+      {
+        \node[anchor=west] (root) at (-4,1) {CompoundStmt};
+        \node[draw, dashed] (cfg) at (0,1) {CFG};
+        \node (cast-buf-sub) at (3,1) {Cast};
+      } \\
+      {
+        \node[onslide=<2-5>{opacity=1}] (out-sub) at (-3,0){Subscript};
+        \node (buf-sub) at (3, 0){Subscript};
+        \node[onslide=<2-5>{opacity=1}] (assign) at (0,0) {BinOp};
+      } \\
+      {
+        \node[anchor=base west] (cast-out) at (-5, 0) {Cast};
+        \node (cast-out-i) at (-2, 0) {Cast};
+        \node (cast-buf) at (2, 0) {Cast};
+        \node (plus-expr) at (4, 0) {BinOp};
+      } \\
+      {
+        \node[anchor=base west] (ref-out) at (-5, 0) {Ref};
+        \node (ref-out-i) at (-2, 0) {Ref};
+        \node (ref-buf) at (0.7, 0) {Ref};
+        \node[draw=dBlue, anchor=base west] at (1.5, 0.1) (var-type-buf) {type};
+        \node (ref-buf-i) at (3.3, 0) {Ref};
+        \node (lit) at (4.7, 0) {Literal};
+      } \\
+      {
+        \node[draw=dBlue] (var-type-out) at (-4, 0) {type};
+        \node[draw=dBlue, anchor=base east] (var-type-i) at (-1,0) {intType};
+      } \\
+      {
+        \node[anchor=base west] (tok-0) at (-5, 0) {out};
+        \node (tok-1) at (-3, 0) {[};
+        \node (tok-2) at (-2.6, 0) {i};
+        \node (tok-3) at (-1, 0) {]};
+        \node[onslide=<2-5>{opacity=1}] (tok-4) at (-0.1, 0) {=};
+        \path (ref-buf |- 0, 0) node (tok-5) {buf};
+        \path (buf-sub |- 0, 0) +(-0.5,0) node (tok-6) {[};
+        \path (ref-buf-i |- 0, 0) node (tok-7) {i};
+        \path (plus-expr |- 0,0) node (tok-8) {+};
+        \path (lit |- 0,0) node (tok-9) {1};
+        \node (tok-10) at (5.5, 0) {]};
+      } \\
+    };
+    \path[every edge/.style={draw, ->}, extern/.style={dashed}, temporal=<2-6>{}{dimmed}{}]
+      (root) edge[onslide=<2-5>{opacity=1}] node[uncover=<3>,pos=0.2, above, sloped, outer sep=1, inner sep=2, circle, fill]{} (assign)
+      (assign) edge[onslide=<2-5>{opacity=1}, cfgedge] node[uncover=<3>,pos=0.8, above, sloped, outer sep=1, inner sep=2, circle, fill=mWine]{} (cfg)
+      (assign) edge[onslide=<2-5>{opacity=1}] node[uncover=<3>,pos=0.8, above, sloped, outer sep=1, inner sep=2, circle, fill=mIndigo]{} (out-sub)
+      (assign) edge[onslide=<2-5>{opacity=1}] node[uncover=<3>,pos=0.8, above, sloped, outer sep=1, inner sep=2, circle, fill=mIndigo]{} (cast-buf-sub)
+      (assign) edge[onslide=<2-5>{opacity=1}, tokenedge] node[uncover=<3>,pos=0.9, above, sloped, outer sep=1, inner sep=2, circle, fill=mTeal]{} (tok-4)
+      (cast-buf-sub) edge[->] (buf-sub)
+      (buf-sub) edge[->] (cast-buf)
+      (buf-sub) edge[tokenedge, bend right=10] (tok-6)
+      (buf-sub) edge[->] (plus-expr)
+      (buf-sub) edge[tokenedge, out=east, in=north] (tok-10)
+      (cast-buf) edge[->] (ref-buf)
+      (ref-buf) edge[dataedge] (var-type-buf)
+      (ref-buf) edge[tokenedge] (tok-5)
+      (plus-expr) edge[->] (ref-buf-i)
+      (plus-expr) edge[->] (lit)
+      (plus-expr) edge[tokenedge] (tok-8)
+      (lit) edge[tokenedge] (tok-9)
+      (ref-buf-i) edge[tokenedge] (tok-7)
+      (ref-buf-i) edge[bend left=8, dataedge] (var-type-i)
+      (out-sub) edge[->] (cast-out)
+      (out-sub) edge[->] (cast-out-i)
+      (out-sub) edge[tokenedge] (tok-1)
+      (out-sub) edge[tokenedge, out=east, in=70] (tok-3)
+      (cast-out) edge[->] (ref-out)
+      (cast-out-i) edge[->] (ref-out-i)
+      (ref-out-i) edge[dataedge] (var-type-i)
+      (ref-out-i) edge[tokenedge] (tok-2)
+      (ref-out) edge[dataedge] (var-type-out)
+      (ref-out) edge[tokenedge] (tok-0)
+      ($(var-type-out.north east)+(0.1,0.5)$) edge[dataedge, extern] (var-type-out)
+      ($(var-type-i.north)+(0.1,0.5)$) edge[dataedge, extern] (var-type-i)
+      ($(var-type-i.north)+(0.4,0.5)$) edge[dataedge, extern] (var-type-i)
+      ($(var-type-buf.south)-(-0.2,0.3)$) edge[dataedge, extern] (var-type-buf)
+      ($(var-type-buf.south)-(0.2,0.3)$) edge[dataedge, extern] (var-type-buf)
+      ($(cfg.north west)+(-0.1,0.5)$) edge[cfgedge, extern] (cfg)
+      (cfg) edge[cfgedge, extern] ($(cfg.north east)+(0.1,0.5)$)
+    ;
+
+    \begin{scope}[font=\scriptsize, uncover=<2-5>]
+      \node [below=0.2em of tok-4] {$\A$};
+      \node [left=0.2em of out-sub] {$\B$};
+      \node [left=0.2em of root] {$\C$};
+      \node [right=0.2em of cfg] {$\D$};
+      \node [right=0.2em of cast-buf-sub] {$\E$};
+      \node [right=0.2em of assign, uncover=<2-4>] {$\F$};
+      \node [right=0.2em of assign, uncover=<5>, text=alerted text.fg] {$\G$};
+    \end{scope}
+    \draw[uncover=<4-5>, inner sep=2] (assign.center) ++(-45:2.5em) circle[radius=1.2em]
+      +( 36:0.7em) node[radius=0.3em, circle, fill=mIndigo]{}
+      +(108:0.7em) node[radius=0.3em, circle, fill=mWine]{}
+      +(180:0.7em) node[radius=0.3em, circle, fill=black]{}
+      +(252:0.7em) node[radius=0.3em, circle, fill=mIndigo]{}
+      +(324:0.7em) node[radius=0.3em, circle, fill=mTeal]{}
+      +(0,0) node[anchor=center] {+}
+    ;
+  \end{tikzpicture}
+  \only<2>{\frametitle{GGNN}\framesubtitle{Initial State}}
+  \only<3>{\frametitle{GGNN}\framesubtitle{Generate Messages}}
+  \only<4>{\frametitle{GGNN}\framesubtitle{Propagate and aggregate}}
+  \only<5>{\frametitle{GGNN}\framesubtitle{Update state}}
+  \only<6>{
+    \frametitle{Sandwich model}\framesubtitle{Combining GGNN with RNN}
+  }
+  \begin{tikzpicture}[remember picture, overlay, uncover=<6>]
+    \node[fit=(tok-0) (tok-10), draw, red, label=below:{\textcolor{dRed}{\small process with RNN}}] {};
+  \end{tikzpicture}

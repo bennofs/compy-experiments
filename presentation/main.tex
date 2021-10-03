@@ -1,18 +1,19 @@
-\documentclass[169,xcolor=table]{beamer}
+\documentclass[aspectratio=169,xcolor=table]{beamer}
 
 \usetheme{ccc}
 
-\usepackage{polyglossia}
-\usepackage{csquotes}
 \usepackage{fontspec}
 \usepackage{blindtext}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{appendixnumberbeamer}
 \usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgf-pie}
 \usepackage{pifont}
 \usepackage{booktabs}
 \usepackage{changepage}
+\usepackage{amsmath}
 \usetikzlibrary{positioning}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{shapes.geometric}
@@ -20,19 +21,98 @@
 \usetikzlibrary{fit}
 \usetikzlibrary{graphs}
 \usetikzlibrary{matrix}
-\usepackage{upquote}
-\usepackage{biblatex}
+\usetikzlibrary{backgrounds}
+\usepackage[backend=biber]{biblatex}
 
 \definecolor{lightgray}{gray}{0.9}
 
+% bright paul tol's colors
+\definecolor{bBlue}{HTML}{4477AA}
+\definecolor{bCyan}{HTML}{66CCEE}
+\definecolor{bGreen}{HTML}{228833}
+\definecolor{bYellow}{HTML}{CCBB44}
+\definecolor{bRed}{HTML}{EE6677}
+\definecolor{bPurple}{HTML}{AA3377}
+\definecolor{bGray}{HTML}{BBBBBB}
+
+% vibrant paul tol's colors
+\definecolor{vBlue}{HTML}{0077BB}
+\definecolor{vCyan}{HTML}{33BBEE}
+\definecolor{vTeal}{HTML}{009988}
+\definecolor{vOrange}{HTML}{EE7733}
+\definecolor{vRed}{HTML}{CC3311}
+\definecolor{vMagenta}{HTML}{EE3377}
+\definecolor{vGray}{HTML}{BBBBBB}
+
+% muted paul tol's colors
+\definecolor{mIndigo}{HTML}{332288}
+\definecolor{mCyan}{HTML}{88CCEE}
+\definecolor{mTeal}{HTML}{44AA99}
+\definecolor{mGreen}{HTML}{117733}
+\definecolor{mOlive}{HTML}{999933}
+\definecolor{mSand}{HTML}{DDCC77}
+\definecolor{mRose}{HTML}{CC6677}
+\definecolor{mWine}{HTML}{882255}
+\definecolor{mPurple}{HTML}{AA4499}
+
+% pale paul tol's colors
+\definecolor{pBlue}{HTML}{BBCCEE}
+\definecolor{pCyan}{HTML}{CCEEFF}
+\definecolor{pGreen}{HTML}{CCDDAA}
+\definecolor{pYellow}{HTML}{EEEEBB}
+\definecolor{pRed}{HTML}{FFCCCC}
+\definecolor{pGray}{HTML}{DDDDDD}
+
+% dark paul tol's colors
+\definecolor{dBlue}{HTML}{222255}
+\definecolor{dCyan}{HTML}{225555}
+\definecolor{dGreen}{HTML}{225522}
+\definecolor{dYellow}{HTML}{666633}
+\definecolor{dRed}{HTML}{663333}
+\definecolor{dGray}{HTML}{555555}
+
+% light paul tol's colors
+\definecolor{lBlue}{HTML}{77AADD}
+\definecolor{lCyan}{HTML}{99DDFF}
+\definecolor{lMint}{HTML}{44BB99}
+\definecolor{lPear}{HTML}{BBCC33}
+\definecolor{lOlive}{HTML}{AAAA00}
+\definecolor{lYellow}{HTML}{EEDD88}
+\definecolor{lOrange}{HTML}{EE8866}
+\definecolor{lPink}{HTML}{FFAABB}
+\definecolor{lGray}{HTML}{DDDDDD}
+
 \addbibresource{zotero.bib}
 
-\lstset{upquote=true}
+\DeclareCiteCommand{\fullcite}
+  {\usebibmacro{prenote}}
+  {\tiny\clearfield{url}%
+    \clearfield{pages}%
+    \clearfield{doi}%
+    \clearfield{isbn}%
+    \clearfield{note}%
+    \clearlist{location}%
+    \clearfield{date}%
+    \clearfield{urlday}%
+    \clearfield{urlmonth}%
+    \clearfield{urlyear}%
+    \iffieldundef{booktitle}{}{\clearfield{eventtitle}}%
+   \clearfield{pagetotal}%
+   \clearfield{edition}%
+   \clearfield{labelyear}%
+   \usedriver
+     {\DeclareNameAlias{sortname}{default}}
+     {\thefield{entrytype}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
 %\setsansfont[BoldFont={Fira Sans SemiBold}]{Fira Sans Book}
 \makeatletter
 \newlength\beamerleftmargin
 \setlength\beamerleftmargin{\Gm@lmargin}
 \makeatother
+
+\setbeamersize{text margin left=5em,text margin right=5em}
 
 \title{Learning Vulnerability Discovery with Global-Relational Models}
 \subtitle{Research Project Compiler Construction}
@@ -62,9 +142,15 @@
   \stepcounter{tmlistings}%
 }
 
-\maketitle
+\begin{frame}[label=current]
+  \titlepage
+\end{frame}
 
-\begin{frame}\frametitle{Deep learning for vulnerability detection}
+\begin{frame}[t]\frametitle{Deep learning for vulnerability detection}
+  \fullcite{ye_deep_2020}
+
+  \vspace{10pt}
+
   \begin{tabular}{lrrr}
     \toprule
     Metrics & µVuldeepecker & Lin et al. & {\bfseries POEM} \\
@@ -75,27 +161,28 @@
     \bottomrule
   \end{tabular}
 
-  \fullcite{ye_deep_2020}
+  \vspace{10pt}
 
   (Dataset: ``collected from standard vulnerable code databases'')
+
 \end{frame}
 
-\begin{frame}<1>[label=overall]\frametitle{Overall structure: binary classification of functions}
+\begin{frame}<1>[label=overall]\frametitle{Overall structure}\framesubtitle{binary classification of functions}
   \begin{tikzpicture}
-    \matrix[row sep=20pt, nodes={minimum width=80pt, inner ysep=5pt}] (layers) {
+    \matrix[row sep=15pt, nodes={minimum width=80pt, inner ysep=5pt}] (layers) {
       \node       (inp) {input sample}; \\
-      \node[draw,drawalert=<2>] (emb) {initialisation}; \\
-      \node[draw,drawalert=<3>] (rep) {model}; \\
-      \node[draw,drawalert=<4>] (ext) {output}; \\
+      \node[draw] (emb) {initialisation}; \\
+      \node[draw] (rep) {model}; \\
+      \node[draw] (ext) {output}; \\
       \node       (out) {prediction}; \\
     };
 
     \node[above right=10pt and 70pt of rep, text width=130pt] (seq-rnn) {sequence-based RNN};
-    \node[right=10pt and 70pt of rep, text width=130pt] (graph-ggnn) {graph-based GGNN \cite{li_gated_2017}};
-    \node[below right=10pt and 70pt of rep, text width=130pt] (combined-sandwich) {sandwich model \cite{hellendoorn_global_2019}};
+    \node[right=10pt and 70pt of rep, text width=130pt] (graph-ggnn) {graph-based GGNN\footnotemark[1]};
+    \node[below right=10pt and 70pt of rep, text width=130pt] (combined-sandwich) {sandwich model\footnotemark[2]};
 
     \node[right=70pt of inp] (functions) {\bfseries functions};
-    \node[right=70pt of out,text width=95pt] (vuln) {\bfseries \hfill not vulnerable (0)\\ \hfill vulnerable (1)};
+    \node[right=70pt of out,text width=10em] (vuln) {\bfseries \hfill not vulnerable (0)\\ \hfill vulnerable (1)};
 
     \graph { (inp) -> (emb) -> (rep) -> (ext) -> (out) };
 
@@ -103,7 +190,13 @@
       (rep.east) -- (seq-rnn.north west) -- ({$(combined-sandwich.south east)$} |- {$(seq-rnn.north east)$}) -- (combined-sandwich.south east) -- (combined-sandwich.south west) -- cycle;
     \draw[dashed, <-] (inp) -- (functions);
     \draw[dashed, ->] (out) -- (vuln);
+
+    \node[uncover=<2>, fit=(inp) (functions), draw, color=alerted text.fg, thick] {};
   \end{tikzpicture}
+
+  \footnotetext[1]{\fullcite{li_gated_2016}}
+  \footnotetext[2]{\fullcite{hellendoorn_global_2020}}
+
 \end{frame}
 
 
@@ -113,7 +206,7 @@
   \end{exampleblock}
 
   \begin{enumerate}
-    \item Implement in Compy-Learn~\cite{brauckmann_compy-learn_2020}
+    \item Implement in Compy-Learn~\footnote{\fullcite{brauckmann_compy-learn_2020}}
     \item Review existing datasets for ML vulnerability discovery
     \item Evaluate the model on \emph{real world data}
   \end{enumerate}
@@ -121,13 +214,14 @@
 
 \section{Model}
 
-\begin{frame}[fragile]\frametitle{A sample function}
+\begin{frame}[fragile, t]\frametitle{A sample function}
 
 \begin{lstlisting}[language=C, morekeywords={uint8_t},
   emph={buf}, emphstyle=\color{green!60!black},
   emph={[2]out}, emphstyle={[2]\color{blue!90!black}},
   emph={[3]pkt_len}, emphstyle={[3]\color{cyan!80!black}},
-  emph={[4]i}, emphstyle={[4]\color{alert}},
+  emph={[4]i}, emphstyle={[4]\color{red!80!black}},
+  numbers=left,
 ]
 int decode_packet(char *buf, char *out) {
   uint8_t pkt_len = buf[0];
@@ -143,34 +237,148 @@ int decode_packet(char *buf, char *out) {
   \begin{tikzpicture}[
     keyword/.style = {font=\bfseries},
     buf/.style = { text=green!60!black },
-    uncover=<2->
+    uncover=<2->,
+    vkeyword/.style = {font=\bfseries},
+    vbuf/.style = { text=green!60!black },
+    vi/.style = { text=red!80!black },
+    vout/.style = { text=blue!90!black },
     ]
-    \matrix[matrix of nodes, column sep=5pt, row sep=20pt, ampersand replacement=\&, nodes={
-      draw, minimum height=20pt, anchor=north, text height=10pt, text depth=3pt,
-    }] {
-      |[keyword] (n0)|int \& |(n1)| decode\_packet \& |[inner xsep=23pt] (n2)| ( \& |[keyword] (n3)|char \& |[inner xsep=10pt] (n4)| * \& |[buf] (n5)|buf \& |[draw=none]| {\large$\cdots$}  \\
+
+
+    \matrix[matrix of nodes, column sep=5pt, row sep=0pt, ampersand replacement=\&,
+      nodes={
+        minimum height=20pt, anchor=north, text height=10pt, text depth=3pt, font=\small,
+      },
+      row 1/.style = {every node/.append style={draw}},
+      row 2/.style = {every node/.append style={font=\scriptsize}},
+      row 3/.style = {font=\scriptsize},
+      row 4/.style = {every node/.append style={rounded corners=1pt,draw,circle}},
+    ] {
+      |[vout]|out \& {[} \& |[vi]|i \& {]} \& = \& |[vbuf]| buf \& {[} \& |[vi]| i \& + \& 1 \& {]} \& ;  \\
+      id \& l\_sq \& id \& r\_sq \& equal \& id \& l\_sq \& id \& plus \& num \& r\_sq \& semi \\
     };
-    \node[anchor=north west, inner xsep=0pt] at (n0.south west) { int };
-    \node[anchor=north west, inner xsep=0pt] at (n1.south west) { identifier };
-    \node[anchor=north west, inner xsep=0pt] at (n2.south west) { l\_paren };
-    \node[anchor=north west, inner xsep=0pt] at (n3.south west) { char };
-    \node[anchor=north west, inner xsep=0pt] at (n4.south west) { star };
-    \node[anchor=north west, inner xsep=0pt] at (n5.south west) { identifier };
+    % \matrix[matrix of nodes, column sep=5pt, row sep=20pt, ampersand replacement=\&, nodes={
+    %   draw, minimum height=20pt, anchor=north, text height=10pt, text depth=3pt,
+    % }] {
+    %   |[keyword] (n0)|int \& |(n1)| decode\_packet \& |[inner xsep=23pt] (n2)| ( \& |[keyword] (n3)|char \& |[inner xsep=10pt] (n4)| * \& |[buf] (n5)|buf \& |[draw=none]| {\large$\cdots$}  \\
+    % };
+    % \node[anchor=north west, inner xsep=0pt] at (n0.south west) { int };
+    % \node[anchor=north west, inner xsep=0pt] at (n1.south west) { identifier };
+    % \node[anchor=north west, inner xsep=0pt] at (n2.south west) { l\_paren };
+    % \node[anchor=north west, inner xsep=0pt] at (n3.south west) { char };
+    % \node[anchor=north west, inner xsep=0pt] at (n4.south west) { star };
+    % \node[anchor=north west, inner xsep=0pt] at (n5.south west) { identifier };
 
   \end{tikzpicture}
 \end{frame}
 
 \begin{frame}[t]\frametitle{Recurrent Neural Networks (RNN)}
+  \vspace{-0.5em}
   \begin{tikzpicture}[
-    keyword/.style = {font=\bfseries},
-    buf/.style = { text=green!60!black },
+    vbuf/.style = {}, % text=green!60!black },
+    vi/.style = {}, % text=red!80!black },
+    vout/.style = {}, % { text=blue!90!black },
     ]
-    \matrix[matrix of nodes, column sep=5pt, row sep=0pt, ampersand replacement=\&, nodes={
-      draw, minimum height=20pt, anchor=north, text height=10pt, text depth=3pt,
-    }] {
-      |[keyword] (n0)|int \& |(n1)| decode\_packet \& |[inner xsep=23pt] (n2)| ( \& |[keyword] (n3)|char \& |[inner xsep=10pt] (n4)| * \& |[buf] (n5)|buf \& |[draw=none]| {\large$\cdots$}  \\
-      |[draw=none]| int   \& |[draw=none]| identifier \& |[draw=none]| l\_paren \& |[draw=none]| char \& |[draw=none]| star \& |[draw=none]| identifier \& \\
+
+    \def\hRSquare{\left[\begin{array}{c} -3 \\ 2 \\ \end{array}\right]}
+    \def\hLSquare{\left[\begin{array}{c} 3 \\ 2 \\ \end{array}\right]}
+    \def\hId{\left[\begin{array}{c} 1 \\ 3 \\ \end{array}\right]}
+    \def\hEqual{\left[\begin{array}{c} 2 \\ 4 \\ \end{array}\right]}
+    \def\hInit{\left[\begin{array}{c} 1 \\ 1 \\ \end{array}\right]}
+
+    \def\hA{\left[\begin{array}{c} 3 \\ 4 \\ \end{array}\right]}
+    \def\hB{\left[\begin{array}{c} 3 \\ 2 \\ \end{array}\right]}
+    \def\hC{\left[\begin{array}{c} 2 \\ 9 \\ \end{array}\right]}
+    \def\hD{\left[\begin{array}{c} 1 \\ 6 \\ \end{array}\right]}
+    \def\hE{\left[\begin{array}{c} 6 \\ 1 \\ \end{array}\right]}
+    \def\hF{\left[\begin{array}{c} 3 \\ 3 \\ \end{array}\right]}
+    \def\hG{\left[\begin{array}{c} 2 \\ 2 \\ \end{array}\right]}
+    \def\hH{\left[\begin{array}{c} 3 \\ 1 \\ \end{array}\right]}
+
+    \matrix[matrix of nodes, column sep=2pt, row sep=0pt, ampersand replacement=\&,
+      nodes={
+        minimum height=20pt, anchor=north, text height=10pt, text depth=3pt, font=\small, outer sep=3pt,
+      },
+      row 1/.style = {every node/.append style={draw, color=black}},
+      row 2/.style = {font=\small},
+      row 3/.style = {font=\scriptsize, every node/.append style={minimum height=25pt}},
+      row 4/.style = {color=vGray, every node/.append style={shape=circle, fill, anchor=center, minimum height=0.2em, inner sep=0pt}},
+      row 5/.style = {every node/.append style={color=black}},
+      %row 4/.style = {every node/.append style={rounded corners=1pt,draw,circle}},
+      column 2/.style = {color=vMagenta},
+      column 4/.style = {color=vMagenta},
+      column 7/.style = {color=vMagenta},
+      column 9/.style = {color=vMagenta},
+      column 6/.style = {color=vCyan},
+      column 3/.style = {color=vTeal},
+      column 8/.style = {color=vTeal},
+      column 5/.style = {color=vBlue},
+      row 4 column 1/.style = {every node/.append style={fill=none}},
+      row 4 column 2/.style = {every node/.append style={color=black}},
+    ] (rnn) {
+      \&[0pt] |[vout]|out \& {[} \& |[vi]|i \& {]} \& = \& |[vbuf]| buf \& {[} \& |[vi]| i \& |[draw=none]| $\cdots$ \\
+      \& id \& l\_sq \& id \& r\_sq \& equal \& id \& l\_sq \& id \\[1em]
+      \& $\hId$ \& $\hLSquare$ \& $\hId$ \& $\hRSquare$ \& $\hEqual$ \& $\hId$ \& $\hLSquare$ \& $\hId$ \\[2em]
+      |[anchor=center, color=black]| $\hInit$
+        \& {}
+        \& {}
+        \& {}
+        \& {}
+        \& {}
+        \& {}
+        \& {}
+        \& {}
+        \\[2em]
+      \& $\hA$ \& $\hB$ \& $\hC$ \& $\hD$ \& $\hE$ \& $\hF$ \& $\hG$ \& $\hH$ \\[2em]
     };
+
+    \graph[edges={color=vGray}] {
+      % input -> cell
+      (rnn-3-2) ->[color=black] (rnn-4-2),
+      (rnn-3-3) -> (rnn-4-3),
+      (rnn-3-4) -> (rnn-4-4),
+      (rnn-3-5) -> (rnn-4-5),
+      (rnn-3-6) -> (rnn-4-6),
+      (rnn-3-7) -> (rnn-4-7),
+      (rnn-3-8) -> (rnn-4-8),
+      (rnn-3-9) -> (rnn-4-9),
+
+      % cell -> ouput
+      (rnn-4-2) ->[color=black] (rnn-5-2),
+      (rnn-4-3) -> (rnn-5-3),
+      (rnn-4-4) -> (rnn-5-4),
+      (rnn-4-5) -> (rnn-5-5),
+      (rnn-4-6) -> (rnn-5-6),
+      (rnn-4-7) -> (rnn-5-7),
+      (rnn-4-8) -> (rnn-5-8),
+      (rnn-4-9) -> (rnn-5-9),
+
+      % cell -> cell
+      (rnn-4-2) ->[color=black] (rnn-4-3),
+      (rnn-4-3) -> (rnn-4-4),
+      (rnn-4-4) -> (rnn-4-5),
+      (rnn-4-5) -> (rnn-4-6),
+      (rnn-4-6) -> (rnn-4-7),
+      (rnn-4-7) -> (rnn-4-8),
+      (rnn-4-8) -> (rnn-4-9),
+
+      % initial state -> first cell
+      (rnn-4-1) ->[color=black] (rnn-4-2),
+    };
+
+    \node[below right=-5pt of rnn-4-2, font=\scriptsize] {cell};
+    \begin{scope}[text=dGray]
+      \node[below right=-5pt of rnn-4-3, font=\scriptsize] {cell};
+      \node[below right=-5pt of rnn-4-4, font=\scriptsize] {cell};
+      \node[below right=-5pt of rnn-4-5, font=\scriptsize] {cell};
+      \node[below right=-5pt of rnn-4-6, font=\scriptsize] {cell};
+      \node[below right=-5pt of rnn-4-7, font=\scriptsize] {cell};
+      \node[below right=-5pt of rnn-4-8, font=\scriptsize] {cell};
+      \node[below right=-5pt of rnn-4-9, font=\scriptsize] {cell};
+    \end{scope}
+
+    \draw[->, dashed, color=vGray] (rnn-4-9) -- (rnn-1-10 |- rnn-4-9);
+
 
     % \node[anchor=north west, inner xsep=0pt] at (n0.south west) { int };
     % \node[anchor=north west, inner xsep=0pt] at (n1.south west) { identifier };
@@ -183,23 +391,30 @@ int decode_packet(char *buf, char *out) {
   \end{tikzpicture}
 \end{frame}
 
-\begin{frame}\frametitle{Representation as Graph: augmented AST}
+\begin{frame}\frametitle{Representation as Graph}\framesubtitle{Augmented AST}
+  \begin{adjustwidth}{-4.7em}{-4.5em}
+    \includegraphics[width=\paperwidth]{media/sample-graph}
+  \end{adjustwidth}
+\end{frame}
+\begin{frame}\frametitle{Representation as Graph}\framesubtitle{Augmented AST}
+  \input{./content/ggnn}
 \end{frame}
 
-\begin{frame}\frametitle{Gated Graph Neural Networks (GGNN)}
+\begin{frame}[label=current]\frametitle{Batching for sandwich models}
+  \input{content/batching}
 \end{frame}
 
-\begin{frame}\frametitle{Extraction: Global Attentation}
-\end{frame}
-
-\begin{frame}\frametitle{Sandwich models: Combining GGNNs and RNNs}
-\end{frame}
-
-\begin{frame}\frametitle{Batching for sandwich models}
+\begin{frame}[label=current]\frametitle{Output: Global Attention}
+  \vspace{-1em}
+  \begin{adjustwidth}{-1em}{0pt}%
+  \input{content/attention}
+  \end{adjustwidth}
 \end{frame}
 
 
 \section{Data}
+
+\againframe<2>{overall}
 
 \begin{frame}\frametitle{A real world vulnerability (National Vulnerability Database)}
   \only<1>{
@@ -214,7 +429,6 @@ int decode_packet(char *buf, char *out) {
 \end{frame}
 
 \begin{frame}[fragile]\frametitle{The bug}
-  \begin{adjustwidth}{-0.5em}{-1.5em}
   \begin{lstlisting}[numbers=left, language=C, emph={parsed}, emphstyle={\alert}, emph={[2]place}, emphstyle={[2]\color{brown!60!black}}]
 xd3_get_appheader (stream, & apphead, & appheadsz);
 
@@ -230,61 +444,52 @@ while ((slash = strchr (start, '/')) != NULL) {
   start = slash + 1;
 }
   \end{lstlisting}
-  \end{adjustwidth}
 \end{frame}
 
-\begin{frame}\frametitle{Existing datasets}
-  % diversity
-  % label precision
+\begin{frame}[label=current]\frametitle{Existing datasets}
+  \small
+  % diversity % label precision
   % size
   % naturalness
   \rowcolors[]{1}{}{lightgray}
-  \begin{tabular}{p{11em}p{15em}}
+  \begin{tabular}{rrrll}
     \toprule
-    name & description \\
+    name & code source & label source & label quality & size \\
     \midrule
-    SARD/SATE & synthetic, by CWE, originally for testing static analyzers \\
-    Draper \cite{russell_automated_2018} & code from Debian/GitHub, labels from static analyzer \\
-    Devign \cite{zhou_devign_2019} & ffmpeg/qemu commits filtered by keyword and manual review \\
-    ReVeal \cite{chakraborty_deep_2020}& CVEs from debian, labels mined from git diff \\
+    Juliet (SATE IV) & synthetic & human & + & +\\
+    SARD\footnote{\url{https://samate.nist.gov/SARD/}} & mixed & human & + & + \\
+    Draper\footnote{\fullcite{russell_automated_2018}} & GitHub,Debian & static analyser & - & +  \\
+    Devign\footnote{\fullcite{zhou_devign_2019}} & FFmpeg,Qemu & human & + & - \\
+    ReVeal\footnote{\fullcite{chakraborty_deep_2020}} & Debian,Chrome & NVD patch & \textasciitilde{} & \textasciitilde{} \\
     \bottomrule
   \end{tabular}
+
+  \begin{tikzpicture}[overlay]
+    \draw[->,thick] (12.25,2.6) -- node[align=left, right]{natural-\\ness} (12.25,0.2);
+
+  \end{tikzpicture}
+
 \end{frame}
 
 \begin{frame}[label=current]\frametitle{Challenge 1: compilation}
+  \input{content/compiling}
+\end{frame}
+
+\begin{frame}[label=current]\frametitle{Challenge 1: compilation}
+  \begin{center}
   \begin{tikzpicture}
-    \def\lwidth{0.1pt};
-    \begin{scope}[local bounding box=samples]
-     \def\corner{0.15in};
-     \def\cornerradius{0.02in};
-     \def\h{1.7cm};
-     \def\w{2cm};
-     \foreach \i in {0,1,2} {
-     \coordinate (nw) at ($(-0.05in*\i,-0.06in*\i)$);
-     \coordinate (ne0) at ($(nw) + (\w, 0)$);
-     \coordinate (ne1) at ($(ne0) - (\corner, 0)$);
-     \coordinate (ne2) at ($(ne0) - (0, \corner)$);
-     \coordinate (se) at ($(ne0) + (0, -\h)$);
-     \filldraw [-, line width = \lwidth, fill=white] (nw) -- (ne1) -- (ne2)
-     [rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
-     \draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
-     }
-     \node[anchor=north west,node distance=0] at (-0.05in,-0.8) {Samples};
+    \begin{scope}[local bounding box=pie]
+      \pie[sum=auto, text=legend, color={pGreen, pYellow, pGray}]{
+        910/compiled,
+        70/preprocessed,
+        432/failed
+      };
     \end{scope}
 
-    \matrix[above right=1em and 1em of samples, column sep=0pt, ampersand replacement=\&] (debian) {
-      \node[anchor=center] {\includegraphics[width=2em]{media/debian-openlogo-nd}}; \& \node[anchor=base]{Deb. Package}; \\
-    };
+    \node[anchor=south east, above right=5em, yshift=1.5em, text width=8em] at (pie.center) {1412 total files\\{\scriptsize from 698 package instances}};
 
-    % \begin{scope}[local bounding box=compiling, below left=1em of debian]
-    %   \foreach \angle in {0, 60, ..., 360} {
-    %     \draw[fill=black] (0,0) -- (\angle-30:0.7cm) -- (\angle-30+8:0.7cm) -- (\angle-13:1cm) -- (\angle+13:1cm) -- (\angle+30-8:0.7cm) -- (\angle+30:0.7cm) -- cycle;
-    %   };
-    %   \draw[fill=white] (0,0) circle [radius=0.3];
-    % \end{scope}
-
-    \draw[dashed,->] (samples) |- (debian);
   \end{tikzpicture}
+  \end{center}
 \end{frame}
 
 % ReVeal
@@ -294,36 +499,78 @@ while ((slash = strchr (start, '/')) != NULL) {
 %
 
 \begin{frame}\frametitle{Challenge 2: dataset is noisy}
-  \includegraphics[width=\framewidth]{media/reveal-unbalanced}
+  \begin{center}
+  \includegraphics[height=0.7\textheight]{media/reveal-unbalanced-crop}
+  \end{center}
+\end{frame}
+
+\begin{frame}\frametitle{Challenge 2: dataset is noisy}
+  \includegraphics[width=\textwidth]{media/libav-big-commit}
 \end{frame}
 
 \section{Results}
 
+\begin{frame}[label=current]\frametitle{Experiments}
+  \textbf{Hardware (ZIH HPC cluster)}
+  \begin{itemize}
+    \item CPU: IBM Power9 CPU (2.80 GHz, 3.10GHz boost)
+    \item GPU: NVIDIA VOLTA V100 with 32GB HBM2
+    \item RAM: 16GB
+  \end{itemize}
 
-\begin{frame}\frametitle{Model can fit the training data}
+  \vspace{1em}
 
+  \textbf{Parameters}
+  \begin{itemize}
+    \item Hidden dimension: 32
+    \item GGNN timesteps: 3-1-3-1
+    \item Sandwich layers: RNN GGNN RNN GGNN RNN
+  \end{itemize}
 \end{frame}
 
-\begin{frame}\frametitle{Model does not generalize}
+
+\begin{frame}\frametitle{Accuracy for vulnerable function pairs}
+  \includegraphics[width=\framewidth]{media/plot-acc-paired}
 \end{frame}
 
-\begin{frame}\frametitle{Future directions}
-  {\bfseries 1. improve embedding}: embed identifier names, simplify graphs \\
-  \vspace{4em}
-  {\bfseries 2. better dataset}: clean with heuristic, other sources (OSS Fuzz, Joern)
+\begin{frame}\frametitle{Detecting patched vs never patched functions}
+  \includegraphics[width=\framewidth]{media/plot-acc-exclusive}
+\end{frame}
+
+\begin{frame}[t, label=current]\frametitle{Future directions}
+  \begin{tabular}{p{0.4\framewidth}@{\hskip 3em}p{0.4\framewidth}}
+      \textbf{model architecture} & \textbf{dataset} \\
+      \begin{itemize}
+        \itemsep0.6em
+        \item handle identifiers
+        \item include representations of called functions
+        \item simplify graph
+        \item predict location of bug
+      \end{itemize} &
+      \begin{itemize}
+        \itemsep0.6em
+        \item more heuristics for compiling
+        \item better filtering
+        \item alternative sources: OSS-Fuzz\footnote{\url{https://google.github.io/oss-fuzz/}}
+        \item fuzzy parsing: Joern\footnote{\url{https://joern.io/}}
+      \end{itemize}
+    \\
+  \end{tabular}
 \end{frame}
 
 \begin{frame}\frametitle{Summary}
   \begin{columns}
     \begin{column}{0.5\textwidth}
+      \vspace{-2.5em}
       \begin{enumerate}
-        \item succefully implemented sandwich model using compy learn
+        \itemsep1em
+        \item implemented sandwich model using compy learn
         \item no model able to generalize on real world data
         \item real world data is hard to find, need better datasets first
       \end{enumerate}
     \end{column}
     \begin{column}{0.5\textwidth}
-      \only<2>{
+      \uncover<2>{
       \includegraphics[width=0.8\textwidth]{media/bug-captcha}
       }
     \end{column}

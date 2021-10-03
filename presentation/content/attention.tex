@@ -1,0 +1,41 @@
+\begin{tikzpicture}
+  \begin{scope}[local bounding box=init]
+    \fill[color=bBlue, radius=0.8em]
+    (0,0) circle[]
+    (1,1) circle[]
+    (2,0) circle[]
+    ;
+    \draw (1,0.3) ellipse[x radius=2.2cm, y radius=1.3cm] +(0,-0.2) node[font=\small,align=center] {states \\ $(x)$};
+  \end{scope}
+
+  \begin{scope}[xshift=5.5cm, yshift=-2cm]
+    \fill[color=bPurple, radius=0.8em] (0,0) circle[];
+    \fill[color=bCyan, radius=0.8em] (1,1) circle[];
+    \fill[color=bGreen, radius=0.8em] (2,0) circle[];
+    \draw (1,0.3) ellipse[x radius=2.2cm, y radius=1.3cm] node[font=\small] (value) {value};
+  \end{scope}
+
+
+  \begin{scope}[xshift=5.5cm, yshift=2cm]
+    \fill[color=bBlue!90, radius=0.8em] (0,0) circle[];
+    \fill[color=bBlue!30, radius=0.8em] (1,1) circle[];
+    \fill[color=bBlue!15, radius=0.8em] (2,0) circle[];
+    \draw (1,0.3) ellipse[x radius=2.2cm, y radius=1.3cm] node[font=\small] (gate) {gate};
+  \end{scope}
+
+  \fill[color=bPurple!80!bCyan] (11.5,0.5) circle[radius=1.2em] +(0,-1) node (out) {output};
+
+  \node[draw,circle] (mult) at (10,0.5) {x};
+
+  \draw (mult) edge[->] (11,0.5);
+  \draw ($(gate)!.5!(mult)$) edge[->] (mult);
+  \draw ($(value)!.45!(mult)$) edge[->] (mult);
+  \draw (1.2, 1.7) edge[out=30, in=180, ->] (4.1, 2.5) node[above=0.8cm]{$softmax(M_{gate} * x)$};
+  \draw (1.2, -1.2) edge[out=-30, in=180, ->] (4.1, -2) node[below=0.8cm]{$M_{output} * x$};
+
+  ¸\node[above=0.5em of mult, font=\small] {sum};
+
+\end{tikzpicture}
+%%% Local Variables:
+%%% TeX-master: "../scratch.tex"
+%%% End:

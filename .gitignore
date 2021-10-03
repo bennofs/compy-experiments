@@ -21,3 +21,5 @@ main.log
 .auctex-auto
 notes.org
 .latex-cache
+*.run.xml
+*.bcf

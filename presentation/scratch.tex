@@ -1,0 +1,101 @@
+\documentclass[aspectratio=169, border=0.2cm, xcolor=table]{beamer}
+
+\usetheme{ccc}
+
+\usepackage{fontspec}
+\usepackage{blindtext}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgf-pie}
+\usepackage{pifont}
+\usepackage{booktabs}
+\usepackage{changepage}
+\usepackage{amsmath}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{calc}
+\usetikzlibrary{fit}
+\usetikzlibrary{graphs}
+\usetikzlibrary{matrix}
+\usetikzlibrary{backgrounds}
+
+\definecolor{lightgray}{gray}{0.9}
+
+% bright paul tol's colors
+\definecolor{bBlue}{HTML}{4477AA}
+\definecolor{bCyan}{HTML}{66CCEE}
+\definecolor{bGreen}{HTML}{228833}
+\definecolor{bYellow}{HTML}{CCBB44}
+\definecolor{bRed}{HTML}{EE6677}
+\definecolor{bPurple}{HTML}{AA3377}
+\definecolor{bGray}{HTML}{BBBBBB}
+
+% vibrant paul tol's colors
+\definecolor{vBlue}{HTML}{0077BB}
+\definecolor{vCyan}{HTML}{33BBEE}
+\definecolor{vTeal}{HTML}{009988}
+\definecolor{vOrange}{HTML}{EE7733}
+\definecolor{vRed}{HTML}{CC3311}
+\definecolor{vMagenta}{HTML}{EE3377}
+\definecolor{vGray}{HTML}{BBBBBB}
+
+% muted paul tol's colors
+\definecolor{mIndigo}{HTML}{332288}
+\definecolor{mCyan}{HTML}{88CCEE}
+\definecolor{mTeal}{HTML}{44AA99}
+\definecolor{mGreen}{HTML}{117733}
+\definecolor{mOlive}{HTML}{999933}
+\definecolor{mSand}{HTML}{DDCC77}
+\definecolor{mRose}{HTML}{CC6677}
+\definecolor{mWine}{HTML}{882255}
+\definecolor{mPurple}{HTML}{AA4499}
+
+% pale paul tol's colors
+\definecolor{pBlue}{HTML}{BBCCEE}
+\definecolor{pCyan}{HTML}{CCEEFF}
+\definecolor{pGreen}{HTML}{CCDDAA}
+\definecolor{pYellow}{HTML}{EEEEBB}
+\definecolor{pRed}{HTML}{FFCCCC}
+\definecolor{pGray}{HTML}{DDDDDD}
+
+% dark paul tol's colors
+\definecolor{dBlue}{HTML}{222255}
+\definecolor{dCyan}{HTML}{225555}
+\definecolor{dGreen}{HTML}{225522}
+\definecolor{dYellow}{HTML}{666633}
+\definecolor{dRed}{HTML}{663333}
+\definecolor{dGray}{HTML}{555555}
+
+% light paul tol's colors
+\definecolor{lBlue}{HTML}{77AADD}
+\definecolor{lCyan}{HTML}{99DDFF}
+\definecolor{lMint}{HTML}{44BB99}
+\definecolor{lPear}{HTML}{BBCC33}
+\definecolor{lOlive}{HTML}{AAAA00}
+\definecolor{lYellow}{HTML}{EEDD88}
+\definecolor{lOrange}{HTML}{EE8866}
+\definecolor{lPink}{HTML}{FFAABB}
+\definecolor{lGray}{HTML}{DDDDDD}
+
+\tikzset{
+  onslide/.code args={<#1>#2}{%
+    \only<#1>{\pgfkeysalso{#2}}% \pgfkeysalso doesn't change the path
+  },
+  temporal/.code args={<#1>#2#3#4}{%
+    \temporal<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}{\pgfkeysalso{#4}}%
+  },
+  hidden/.style = {opacity=0},
+  uncover/.style = {temporal=#1{hidden}{}{hidden}},
+  drawalert/.style = {temporal=#1{}{color=alerted text.fg}{}}
+}
+
+\begin{document}
+\begin{frame}
+\end{frame}
+\begin{frame}\frametitle{Scratch}
+\input{content/attention}
+\end{frame}
+\end{document}

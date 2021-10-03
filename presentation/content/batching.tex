@@ -1,0 +1,49 @@
+\textbf{edges:} list of (kind, source index, dest index) tuples
+
+\vspace{1em}
+
+\begin{tikzpicture}
+  % \begin{scope}
+  %   \node(tokens)[fill=pGreen, outer sep=0pt]{tokens};
+  %   \node(inner)[right=0pt of tokens,node distance=0pt, outer sep=0pt][fill=pBlue]{inner nodes};
+  %   \node(plus)[right=0.2em of inner]{+};
+  %   \node(edges)[right=0.2em of plus, fill=pYellow]{edges};
+  %   \node[left=1em of tokens.west, anchor=east, inner sep=0pt](single){single sample: };
+  % \end{scope}
+
+  \matrix[nodes={text height=8pt, text depth=14pt, inner xsep=0pt}, ampersand replacement=\&]{
+    \node[fill=pGreen, text width=5em, align=center] (tok1) {tokens \\ 1}; \&
+    \node[fill=pGray, text width=3em, align=center]  (pad1) {pad \\ 1}; \&
+    \node[fill=pGreen, text width=8em, align=center] (tok2) {tokens \\ 2}; \&
+    \node[fill=pBlue, text width=7em, align=center]  (inner) {inner nodes \\ 1 + 2};
+    \\
+  };
+
+  \draw[decorate, decoration=brace] ($(tok1.north west) + (0, 0.2em)$) -- node[name=seq1-lab, above, font=\small]{first sequence} ($(pad1.north east) + (0, 0.2em)$);
+
+  \draw[decorate, decoration={brace, mirror}] ($(tok2.south west) - (0, 0.2em)$) -- node[name=seq2-lab, below, font=\small]{second sequence} ($(tok2.south east) - (0, 0.2em)$);
+
+  \node[draw, dashed, fit=(seq1-lab) (seq2-lab) (tok1) (tok2)] (seq-flat) {};
+
+  \matrix[nodes={text height=8pt, text depth=14pt, inner xsep=0pt}, ampersand replacement=\&, anchor=north] at ($(seq-flat.south) + (3em, -1em)$)  (packed-row1) {
+    \node[fill=pGreen, text width=5em, align=center] (pack-tok1) {tokens \\ 1}; \&
+    \node[fill=pGray, text width=3em, align=center]  (pack-pad1) {pad \\ 1}; \\
+  };
+
+  \node[fill=pGreen, text width=8em, align=center, inner xsep=0pt, anchor=north west] at (pack-tok1.south west) {tokens \\ 2};
+
+  \node[font=\bfseries, left=1em of seq-flat, inner sep=0pt] {nodes:};
+
+  \draw[thick] ($(seq-flat.south west) + (1em, -0.2em)$) edge[out=-90, ->, in=180] node[left=1em]{reshape} (pack-tok1.south west);
+  % \node[below=2em of single.south east, anchor=east, inner sep=0pt] (batch) {batch:};
+  % \node(tokens1)[fill=pGreen, outer sep=0pt, right=1em of batch.east, anchor=west] {tokens};
+  % \node(pad1)[fill=pGray, outer sep=0pt, right=1em of .east, anchor=west] {tokens};
+  % \node(inner1)[right=0pt of tokens,node distance=0pt, outer sep=0pt][fill=pBlue]{inner nodes};
+  % \node(plus)[right=0.2em of inner]{+};
+  % \node(edges)[right=0.2em of plus, fill=pYellow]{edges};
+
+\end{tikzpicture}
+
+%%% Local Variables:
+%%% TeX-master: "../scratch.tex"
+%%% End:
