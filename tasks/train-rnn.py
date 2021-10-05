@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 
 tf.compat.v1.enable_eager_execution()
 tf.compat.v1.enable_v2_behavior()
@@ -58,14 +58,20 @@ def main(args):
     print("parameter count", MODEL.count_params())
 
     # Train and test
-    kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=204)
-    split = kf.split(samples, [sample["y"] for sample in samples])
-    for i, (train_idx, test_idx) in enumerate(split):
+    names = np.array(set(sample['info']['name'] for sample in samples))
+    rng = np.random.default_rng(seed=0)
+    rng.shuffle(names)
+
+    kf = KFold(n_splits=10, shuffle=True, random_state=204)
+    split = kf.split(names)
+    for i, (train_names_idx, test_names_idx) in enumerate(split):
+        train_names = set(names[train_names_idx])
+        test_names = set(names[test_names_idx])
         rng = np.random.default_rng(seed=0)
-        train_samples = samples[train_idx]
+        train_samples = np.array([s for s in samples if s['info']['name'] in train_names])
         rng.shuffle(train_samples)
         train_data = tokens_dataset(train_samples).batch(32)
-        test_data = tokens_dataset(samples[test_idx]).batch(32)
+        test_data = tokens_dataset(np.array([s for s in samples if s['info']['name'] in test_names])).batch(32)
 
         model = make_model(hidden=hidden_dim, vocab_size=vocab_size)
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
