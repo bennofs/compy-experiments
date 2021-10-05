@@ -44,6 +44,7 @@ SCRIPT_MODEL = {
     'train-sandwich': 'sandwich',
     'train-simple-model': 'simple',
     'train-rnn-only': 'rnn-only',
+    'train-rnn': 'rnn',
 }
 
 t_start = datetime.fromisoformat('2021-09-29T00:00:00')
@@ -60,9 +61,12 @@ for t, r in all_results:
     dataset = DATASET_NAMES[Path(parameters[1]).name]
     hidden = int(parameters[2].split('=')[1])
 
-    with open(r / 'config.json') as f:
-        config = json.load(f)
-    timesteps = config.get('ggnn', {}).get('time_steps')
+    if (r/'config.json').exists():
+        with open(r / 'config.json') as f:
+            config = json.load(f)
+        timesteps = config.get('ggnn', {}).get('time_steps')
+    else:
+        timesteps = None
 
     result = {
         'time': t,
@@ -126,12 +130,15 @@ acc_paired = pd.DataFrame({
     'sandwich-val': results_by_key['sandwich-paired-32h-3 1']['val_accuracy'].mean(axis=1),
     'ggnn-train': results_by_key['ggnn-paired-32']['accuracy'].mean(axis=1),
     'sandwich-train': results_by_key['sandwich-paired-32h-3 1']['accuracy'].mean(axis=1),
+    'rnn-train': results_by_key['rnn-paired-undirected-32']['accuracy'].mean(axis=1),
+    'rnn-val': results_by_key['rnn-paired-undirected-32']['accuracy'].mean(axis=1),
 })
 acc_paired.plot(figsize=(8,4.5))
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
 #plt.savefig()
-plt.savefig('presentation/media/plot-acc-paired.pdf', bbox_inches='tight')
+#plt.savefig('presentation/media/plot-acc-paired.pdf', bbox_inches='tight')
+plt.show()
 #%%
 acc_exclusive = pd.DataFrame({
     'ggnn-val': results_by_key['ggnn-exclusive-32']['val_accuracy'].mean(axis=1),
@@ -144,6 +151,6 @@ acc_exclusive = pd.DataFrame({
 acc_exclusive.plot(figsize=(8,4.5)).legend(loc='upper left')
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
-#plt.show()
-plt.savefig('presentation/media/plot-acc-exclusive.pdf', bbox_inches='tight')
+plt.show()
+#plt.savefig('presentation/media/plot-acc-exclusive.pdf', bbox_inches='tight')
 #%%
