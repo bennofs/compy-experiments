@@ -131,7 +131,7 @@ acc_paired = pd.DataFrame({
     'ggnn-train': results_by_key['ggnn-paired-32']['accuracy'].mean(axis=1),
     'sandwich-train': results_by_key['sandwich-paired-32h-3 1']['accuracy'].mean(axis=1),
     'rnn-train': results_by_key['rnn-paired-undirected-32']['accuracy'].mean(axis=1),
-    'rnn-val': results_by_key['rnn-paired-undirected-32']['accuracy'].mean(axis=1),
+    'rnn-val': results_by_key['rnn-paired-undirected-32']['val_accuracy'].mean(axis=1),
 })
 acc_paired.plot(figsize=(8,4.5))
 plt.xlabel('epoch')
@@ -145,8 +145,10 @@ acc_exclusive = pd.DataFrame({
     'sandwich-val': results_by_key['sandwich-exclusive-32h-3 1']['val_accuracy'].mean(axis=1),
     'ggnn-train': results_by_key['ggnn-exclusive-32']['accuracy'].mean(axis=1),
     'sandwich-train': results_by_key['sandwich-exclusive-32h-3 1']['accuracy'].mean(axis=1),
-    'simple-train': results_by_key['simple-exclusive-8']['accuracy'].mean(axis=1),
-    'simple-val': results_by_key['simple-exclusive-8']['val_accuracy'].mean(axis=1),
+    'sandwich (simple)-train': results_by_key['simple-exclusive-8']['accuracy'].mean(axis=1),
+    'sandwich (simple)-val': results_by_key['simple-exclusive-8']['val_accuracy'].mean(axis=1),
+    'rnn-train': results_by_key['rnn-exclusive-undirected-32']['accuracy'].mean(axis=1),
+    'rnn-val': results_by_key['rnn-exclusive-undirected-32']['val_accuracy'].mean(axis=1),
 })
 acc_exclusive.plot(figsize=(8,4.5)).legend(loc='upper left')
 plt.xlabel('epoch')

@@ -132,7 +132,7 @@ def main(args):
     print("parameter count", MODEL.count_params())
 
     # Train and test
-    names = np.array(set(s['info']['name'] for s in samples))
+    names = np.array(list(set(s['info']['name'] for s in samples)))
 
     # Train and test
     kf = KFold(n_splits=10, shuffle=True, random_state=204)
