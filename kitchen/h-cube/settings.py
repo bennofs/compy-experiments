@@ -1,0 +1,8 @@
+NVDCVE_PATH = "/home/bennofs/blob/nvdcve"
+REVEAL_PATH = "/home/bennofs/blob/reveal"
+SNAPSHOT_FILES_PATH = "/home/bennofs/blob/debian-snapshot-files"
+CVE_REPOS = "/home/bennofs/blob/cve-repos"
+SECURITY_TRACKER_PATH = "/home/bennofs/src/security-tracker"
+CHECKOUTS_PATH = "/home/bennofs/tmp/checkouts"
+DEBIAN_INDEX_PATH = "/home/bennofs/blob/debian-index"
+COMPILED_PATH = "/home/bennofs/blob/compiled"
