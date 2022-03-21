@@ -84,6 +84,8 @@
 
 \addbibresource{zotero.bib}
 
+\renewcommand{\UrlFont}{\scriptsize}
+
 \DeclareCiteCommand{\fullcite}
   {\usebibmacro{prenote}}
   {\tiny\clearfield{url}%
@@ -181,8 +183,8 @@
     \node[right=10pt and 70pt of rep, text width=130pt] (graph-ggnn) {graph-based GGNN\footnotemark[1]};
     \node[below right=10pt and 70pt of rep, text width=130pt] (combined-sandwich) {sandwich model\footnotemark[2]};
 
-    \node[right=70pt of inp] (functions) {\bfseries functions};
-    \node[right=70pt of out,text width=10em] (vuln) {\bfseries \hfill not vulnerable (0)\\ \hfill vulnerable (1)};
+    \node[right=70pt of inp, drawalert=<2>] (functions) {\bfseries functions};
+    \node[right=70pt of out,text width=10em,drawalert=<2>] (vuln) {\bfseries \hfill not vulnerable (0)\\ \hfill vulnerable (1)};
 
     \graph { (inp) -> (emb) -> (rep) -> (ext) -> (out) };
 
@@ -190,8 +192,6 @@
       (rep.east) -- (seq-rnn.north west) -- ({$(combined-sandwich.south east)$} |- {$(seq-rnn.north east)$}) -- (combined-sandwich.south east) -- (combined-sandwich.south west) -- cycle;
     \draw[dashed, <-] (inp) -- (functions);
     \draw[dashed, ->] (out) -- (vuln);
-
-    \node[uncover=<2>, fit=(inp) (functions), draw, color=alerted text.fg, thick] {};
   \end{tikzpicture}
 
   \footnotetext[1]{\fullcite{li_gated_2016}}
@@ -533,26 +533,30 @@ while ((slash = strchr (start, '/')) != NULL) {
   \includegraphics[width=\framewidth]{media/plot-acc-paired}
 \end{frame}
 
+\begin{frame}\frametitle{Val/train split by function}
+  \includegraphics[width=\framewidth]{media/plot-acc-funsplit}
+\end{frame}
+
 \begin{frame}\frametitle{Detecting patched vs never patched functions}
   \includegraphics[width=\framewidth]{media/plot-acc-exclusive}
 \end{frame}
 
 \begin{frame}[t, label=current]\frametitle{Future directions}
   \begin{tabular}{p{0.4\framewidth}@{\hskip 3em}p{0.4\framewidth}}
-      \textbf{model architecture} & \textbf{dataset} \\
+      \textbf{dataset} & \textbf{model architecture} \\
+      \begin{itemize}
+        \itemsep0.6em
+        \item more heuristics for compiling
+        \item fuzzy parsing: Joern\footnote{\url{https://joern.io/}}
+        \item better filtering
+        \item alternative sources: OSS-Fuzz\footnote{\url{https://google.github.io/oss-fuzz/}}
+      \end{itemize} &
       \begin{itemize}
         \itemsep0.6em
         \item handle identifiers
         \item include representations of called functions
         \item simplify graph
         \item predict location of bug
-      \end{itemize} &
-      \begin{itemize}
-        \itemsep0.6em
-        \item more heuristics for compiling
-        \item better filtering
-        \item alternative sources: OSS-Fuzz\footnote{\url{https://google.github.io/oss-fuzz/}}
-        \item fuzzy parsing: Joern\footnote{\url{https://joern.io/}}
       \end{itemize}
     \\
   \end{tabular}

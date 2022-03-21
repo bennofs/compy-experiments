@@ -137,8 +137,8 @@ acc_paired.plot(figsize=(8,4.5))
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
 #plt.savefig()
-#plt.savefig('presentation/media/plot-acc-paired.pdf', bbox_inches='tight')
-plt.show()
+plt.savefig('presentation/media/plot-acc-paired.pdf', bbox_inches='tight')
+#plt.show()
 #%%
 acc_exclusive = pd.DataFrame({
     'ggnn-val': results_by_key['ggnn-exclusive-32']['val_accuracy'].mean(axis=1),
@@ -153,6 +153,40 @@ acc_exclusive = pd.DataFrame({
 acc_exclusive.plot(figsize=(8,4.5)).legend(loc='upper left')
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
-plt.show()
-#plt.savefig('presentation/media/plot-acc-exclusive.pdf', bbox_inches='tight')
+#plt.show()
+plt.savefig('presentation/media/plot-acc-exclusive.pdf', bbox_inches='tight')
 #%%
+r = Path("local/train-ggnn-funsplit")
+ggnn = { 'metrics': {} }
+for metrics_path in r.glob('*-metrics.json'):
+    split_idx = int(metrics_path.name.split('-')[-2])
+    with open(metrics_path, 'rb') as f:
+        d = json.load(f)
+    ggnn['metrics'][split_idx] = d
+for metric in ['val_loss', 'loss', 'accuracy', 'val_accuracy']:
+    ggnn[metric] = pd.DataFrame(
+        { idx: data[metric] for idx, data in ggnn['metrics'].items() }
+    )
+
+r = Path("local/train-sandwich-funsplit")
+sandwich = { 'metrics': {} }
+for metrics_path in r.glob('*-metrics.json'):
+    split_idx = int(metrics_path.name.split('-')[-2])
+    with open(metrics_path, 'rb') as f:
+        d = json.load(f)
+    sandwich['metrics'][split_idx] = d
+for metric in ['val_loss', 'loss', 'accuracy', 'val_accuracy']:
+    sandwich[metric] = pd.DataFrame(
+        { idx: data[metric] for idx, data in sandwich['metrics'].items() }
+    )
+
+funsplit = pd.DataFrame({
+    'sandwich-train': sandwich['accuracy'].mean(axis=1),
+    'sandwich-val': sandwich['val_accuracy'].mean(axis=1),
+    'ggnn-val': ggnn['val_accuracy'].mean(axis=1),
+    'ggnn-train': ggnn['accuracy'].mean(axis=1),
+})
+funsplit.plot(figsize=(8,4.5))
+plt.xlabel('epoch')
+plt.ylabel('accuracy')
+plt.savefig('presentation/media/plot-acc-funsplit.pdf', bbox_inches='tight')
